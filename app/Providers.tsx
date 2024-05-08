@@ -1,23 +1,16 @@
 "use client";
 
 import { TooltipProvider } from "@radix-ui/react-tooltip";
-import { Session } from "next-auth";
-import { SessionProvider } from "next-auth/react";
-import { ReactNode } from "react";
+import { SessionProvider as NextAuthSessionProvider, Session } from "next-auth";
 import { LiveblocksProvider } from "@/liveblocks.config";
+import { ReactNode } from "react";
 
-export function Providers({
-  children,
-  session,
-}: {
-  children: ReactNode;
-  session: Session | null;
-}) {
+export function Providers({ children, session }) {
   return (
-    <SessionProvider session={session}>
+    <NextAuthSessionProvider session={session}>
       <LiveblocksProvider>
         <TooltipProvider>{children}</TooltipProvider>
       </LiveblocksProvider>
-    </SessionProvider>
+    </NextAuthSessionProvider>
   );
 }
