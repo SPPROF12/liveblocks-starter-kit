@@ -3,14 +3,18 @@ import { getGroup } from "@/lib/database";
 import { Group } from "@/types";
 import { DocumentsList } from "./DocumentsList";
 
-type Props = {
+type DocumentsLayoutProps = {
   filter?: "all" | "drafts" | "group";
   groupId?: Group["id"];
 };
 
-export async function DocumentsLayout({ filter, groupId }: Props) {
+export const DocumentsLayout = async ({
+  filter,
+  groupId,
+}: DocumentsLayoutProps) => {
   if (groupId) {
     const group = await getGroup(groupId);
+
     if (!group) {
       return (
         <ErrorLayout
@@ -22,8 +26,9 @@ export async function DocumentsLayout({ filter, groupId }: Props) {
         />
       );
     }
+
     return <DocumentsList filter={filter} group={group} />;
   }
 
   return <DocumentsList filter={filter} />;
-}
+};
