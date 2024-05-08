@@ -1,4 +1,4 @@
-.comment-highlight {
+:where(.comment-highlight) {
   display: inline-block;
   position: relative;
   background: transparent;
@@ -6,7 +6,7 @@
   color: var(--color-text);
 }
 
-.comment-highlight::before {
+:where(.comment-highlight)::before {
   content: "";
   position: absolute;
   top: -1px;
@@ -20,7 +20,7 @@
 
 .comment-highlight[data-state="composing"] {
   --comment-highlight-color: var(--comment-highlight-composing);
-  --comment-border-color: var(--comment-highlight-composing-border) !important;
+  --comment-border-color: var(--comment-highlight-composing-border);
 }
 
 .comment-highlight[data-state="complete"] {
