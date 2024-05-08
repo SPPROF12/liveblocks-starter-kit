@@ -1,14 +1,17 @@
+/* Container styles */
 .container {
   display: flex;
   width: 100%;
   min-height: 100vh;
 }
 
+/* Main and aside take up half the width each */
 .main,
 .aside {
   flex: 1 0 50%;
 }
 
+/* Main content styles */
 .main {
   display: flex;
   flex-direction: column;
@@ -16,23 +19,27 @@
   justify-content: center;
 }
 
+/* Hide the aside by default */
 .aside {
   display: none;
-  background: var(--color-surface);
+  background-color: var(--color-surface);
 }
 
+/* Title styles */
 .title {
   margin-bottom: var(--space-9);
   font-size: var(--size-2xl);
   font-weight: 700;
 }
 
+/* Actions styles */
 .actions {
   display: flex;
   gap: var(--space-6);
 }
 
-@media (min-width: 1024px) {
+/* Show the aside on screens 768px wide or wider */
+@media (min-width: 768px) {
   .aside {
     display: block;
   }
