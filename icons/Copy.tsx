@@ -1,6 +1,6 @@
-import { ComponentProps } from "react";
+import { SVGProps } from 'react';
 
-export function CopyIcon(props: ComponentProps<"svg">) {
+export function CopyIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       width="16"
@@ -23,7 +23,7 @@ export function CopyIcon(props: ComponentProps<"svg">) {
         vectorEffect="non-scaling-stroke"
       />
       <path
-        d="M9 4v-.5A1.5 1.5 0 0 0 7.5 2h-4A1.5 1.5 0 0 0 2 3.5v4A1.5 1.5 0 0 0 3.5 9H4"
+        d="M9 4v-0.5A1.5 1.5 0 0 0 7.5 2h-4A1.5 1.5 0 0 0 2 3.5v4A1.5 1.5 0 0 0 3.5 9h0.5"
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
