@@ -3,29 +3,16 @@
 import { RoomUser } from "@liveblocks/node";
 import { auth } from "@/auth";
 import { UserInfo } from "@/liveblocks.config";
+import { LiveUserList, Props, Document } from "@/types";
 import { liveblocks } from "@/liveblocks.server.config";
-import { Document } from "@/types";
 
-type LiveUserList = { documentId: Document["id"]; users: RoomUser<UserInfo>[] };
+type GetActiveUsers = () => Promise<{ data: RoomUser<UserInfo>[] }>;
 
-type Props = {
-  documentIds: Document["id"][];
-};
+const getActiveUsers = (roomId: Document["id"]): GetActiveUsers =>
+  () => liveblocks.getActiveUsers<UserInfo>(roomId);
 
-/**
- * Get Live Users
- *
- * Get the online users in the documents passed
- * Uses custom API endpoint
- *
- * @param documentIds - An array of document ids
- */
-export async function getLiveUsers({ documentIds }: Props) {
-  const promises: ReturnType<typeof liveblocks.getActiveUsers<UserInfo>>[] = [];
-
-  for (const roomId of documentIds) {
-    promises.push(liveblocks.getActiveUsers<UserInfo>(roomId));
-  }
+export async function getLiveUsers({ documentIds }: Props): Promise<{ data: LiveUserList[] } | { error: { code: number, message: string, suggestion: string } }> {
+  const promises = documentIds.map(getActiveUsers);
 
   let session;
   let currentActiveUsers = [];
@@ -33,7 +20,7 @@ export async function getLiveUsers({ documentIds }: Props) {
     // Get session and rooms
     const [sess, ...roomUsers] = await Promise.all([auth(), ...promises]);
     session = sess;
-    currentActiveUsers = roomUsers;
+    currentActiveUsers = roomUsers.map(({ data }) => data ?? []);
   } catch (err) {
     console.error(err);
     return {
@@ -56,17 +43,10 @@ export async function getLiveUsers({ documentIds }: Props) {
     };
   }
 
-  const result: LiveUserList[] = [];
-  // Add active user info to list ready to return
-  for (const [i, roomId] of documentIds.entries()) {
-    const { data } = currentActiveUsers[i];
-    const users = data ?? [];
-
-    result.push({
-      documentId: roomId,
-      users: users,
-    });
-  }
+  const result = documentIds.map((roomId, i) => ({
+    documentId: roomId,
+    users: currentActiveUsers[i],
+  }));
 
   return { data: result };
 }
