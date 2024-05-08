@@ -1,36 +1,53 @@
 import clsx from "clsx";
-import { ComponentProps } from "react";
+import { forwardRef, ComponentProps } from "react";
+import { cssVars, useCSSVars } from "@mantine/core";
 import styles from "./Spinner.module.css";
 
-export interface Props extends ComponentProps<"svg"> {
+export interface SpinnerProps extends ComponentProps<"svg"> {
   size?: number;
+  cssVars?: cssVars;
 }
 
-export function Spinner({ size = 16, className, ...props }: Props) {
+const Spinner = forwardRef<SVGSVGElement, SpinnerProps>((props, ref) => {
+  const { cssVars: customCssVars, ...spinnerProps } = useCSSVars(props.cssVars);
+
   return (
     <svg
-      width={size}
-      height={size}
+      ref={ref}
+      width={props.size}
+      height={props.size}
       viewBox="0 0 16 16"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={clsx(className, styles.spinner)}
-      {...props}
+      role="status"
+      aria-label="Loading"
+      className={clsx(props.className, styles.spinner, customCssVars?.root)}
+      {...spinnerProps}
     >
       <path
         d="M14 8a6 6 0 1 1-6-6"
         stroke="currentColor"
         strokeWidth="2"
         vectorEffect="non-scaling-stroke"
+        className={customCssVars?.path}
       />
     </svg>
   );
+});
+
+export interface DocumentSpinnerProps {
+  size?: number;
+  cssVars?: cssVars;
 }
 
-export function DocumentSpinner() {
-  return (
-    <div className={styles.documentSpinner}>
-      <Spinner size={24} />
-    </div>
-  );
-}
+const DocumentSpinner = forwardRef<HTMLDivElement, DocumentSpinnerProps>(
+  ({ size = 24, cssVars, ...props }, ref) => {
+    return (
+      <div ref={ref} className={styles.documentSpinner} {...props}>
+        <Spinner size={size} cssVars={cssVars} />
+      </div>
+    );
+  }
+);
+
+export { Spinner, DocumentSpinner };
