@@ -9,9 +9,16 @@ module.exports = {
     "plugin:prettier/recommended",
     "plugin:import/recommended",
     "plugin:import/typescript",
-    "next",
+    "next/core-web-vitals",
   ],
   parser: "@typescript-eslint/parser",
+  parserOptions: {
+    ecmaFeatures: {
+      jsx: true,
+    },
+    ecmaVersion: 12,
+    sourceType: "module",
+  },
   plugins: [
     "@typescript-eslint",
     "react",
@@ -26,7 +33,10 @@ module.exports = {
     "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
-    "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+    ],
     "@typescript-eslint/no-use-before-define": "off",
     "@typescript-eslint/no-var-requires": "off",
     "react/display-name": "off",
@@ -42,7 +52,10 @@ module.exports = {
     "import/no-duplicates": "error",
     "import/no-named-as-default": "off",
     "import/no-named-as-default-member": "off",
-    "import/no-unresolved": ["error", { ignore: ["hast", "mdast", "unist"] }],
+    "import/no-unresolved": [
+      "error",
+      { ignore: ["hast", "mdast", "unist"], commonjs: true },
+    ],
     "import/no-unused-modules": "warn",
     "import/order": [
       "warn",
@@ -76,5 +89,12 @@ module.exports = {
 
     "unused-imports/no-unused-imports": "error",
     "unused-imports/no-unused-vars": "off",
+  },
+  settings: {
+    "import/resolver": {
+      node: {
+        extensions: [".js", ".jsx", ".ts", ".tsx"],
+      },
+    },
   },
 };
