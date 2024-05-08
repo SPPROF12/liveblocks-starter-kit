@@ -1,3 +1,16 @@
+/* Variables */
+:root {
+  --space-6: 16px;
+  --space-4: 12px;
+  --size-sm: 14px;
+  --size-xs: 12px;
+  --color-red: #FF0000;
+  --color-text-lighter: #CCCCCC;
+  --opacity-hover: 50%;
+  --transition: opacity 0.2s ease-in-out;
+}
+
+/* Rows */
 .rows {
   display: flex;
   flex-direction: column;
@@ -6,7 +19,7 @@
 
 .row {
   display: flex;
-  place-items: center;
+  align-items: center;
 }
 
 .rowInfo {
@@ -24,15 +37,18 @@
   font-weight: 500;
 }
 
-.rowRemoveButton,
 .rowDescription {
   font-size: var(--size-xs);
+  color: var(--color-text-lighter);
 }
 
+/* Buttons */
 .rowRemoveButton {
+  font-size: var(--size-xs);
   color: rgb(var(--color-red) / 80%);
-  transition: opacity var(--transition);
+  transition: var(--transition);
   outline: none;
+  margin-left: auto;
 }
 
 .rowRemoveButton:hover,
@@ -40,10 +56,7 @@
   opacity: var(--opacity-hover);
 }
 
-.rowDescription {
-  color: var(--color-text-lighter);
-}
-
+/* Selects */
 .rowAccessSelect {
   margin-left: auto;
 }
