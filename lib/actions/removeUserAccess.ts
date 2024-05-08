@@ -7,7 +7,6 @@ import {
   isUserDocumentOwner,
   userAllowedInRoom,
 } from "@/lib/utils";
-import { liveblocks } from "@/liveblocks.server.config";
 import { Document, DocumentUser } from "@/types";
 
 type Props = {
@@ -25,19 +24,11 @@ type Props = {
  * @param documentId - The document id
  */
 export async function removeUserAccess({ userId, documentId }: Props) {
-  let session;
-  let room;
-  let user;
+  let session, room, user;
   try {
-    // Get session and room
-    const result = await Promise.all([
-      auth(),
-      liveblocks.getRoom(documentId),
-      getUser(userId),
-    ]);
-    session = result[0];
-    room = result[1];
-    user = result[2];
+    // Get session, room, and user
+    const result = await Promise.all([auth(), fetchRoom(documentId), getUser(userId)]);
+    [session, room, user] = result;
   } catch (err) {
     console.error(err);
     return {
@@ -61,15 +52,7 @@ export async function removeUserAccess({ userId, documentId }: Props) {
   }
 
   // Check current logged-in user is set as a user with id, ignoring groupIds and default access
-  if (
-    !userAllowedInRoom({
-      accessAllowed: "write",
-      checkAccessLevel: "user",
-      userId: session.user.info.id,
-      groupIds: [],
-      room,
-    })
-  ) {
+  if (!userAllowedInRoom({ accessAllowed: "write", checkAccessLevel: "user", userId: session.user.info.id, groupIds: [], room })) {
     return {
       error: {
         code: 403,
@@ -120,9 +103,8 @@ export async function removeUserAccess({ userId, documentId }: Props) {
   // Send userAccesses to room and remove user
   let updatedRoom;
   try {
-    updatedRoom = await liveblocks.updateRoom(documentId, {
-      usersAccesses,
-    });
+    updatedRoom = await fetchRoom(documentId, { method: "PATCH", body: JSON.stringify({ usersAccesses }), headers: { "Content-Type": "application/json" } });
+    updatedRoom = await updatedRoom.json();
   } catch (err) {
     return {
       error: {
@@ -143,9 +125,14 @@ export async function removeUserAccess({ userId, documentId }: Props) {
     };
   }
 
-  const result: DocumentUser[] = await buildDocumentUsers(
-    updatedRoom,
-    session.user.info.id
-  );
+  const result: DocumentUser[] = await buildDocumentUsers(updatedRoom, session.user.info.id);
   return { data: result };
 }
+
+async function fetchRoom(documentId: string, options?: RequestInit) {
+  return fetch(`/api/rooms/${documentId}`, options).then(res => {
+    if (!res.ok) throw new Error("Failed to fetch room");
+    return res;
+  });
+}
+
