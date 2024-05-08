@@ -1,20 +1,22 @@
+/* Header styles */
 .header {
   display: grid;
+  box-sizing: border-box; /* Include padding in total width */
   width: 100%;
   height: 100%;
   padding: 0 var(--space-8);
-  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-columns: repeat(3, 1fr); /* Use repeat function for easier resizing */
 }
 
 .menu,
 .logo,
 .profile {
   display: flex;
-  place-items: center;
+  align-items: center;
 }
 
 .menu {
-  place-content: flex-start;
+  justify-content: flex-start;
 }
 
 .menuToggle {
@@ -23,12 +25,14 @@
   height: 32px;
   background: var(--color-surface);
   border-radius: 100%;
-  place-content: center;
-  place-items: center;
+  justify-content: center;
+  align-items: center;
+  user-select: none; /* Prevent text selection */
+  cursor: pointer; /* Indicate interactive element */
 }
 
 .logo {
-  place-content: center;
+  justify-content: center;
 }
 
 .logoLink {
@@ -43,12 +47,21 @@
 
 .profile {
   gap: var(--space-6);
-  place-content: flex-end;
+  justify-content: flex-end;
 }
 
 .profileButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  background: var(--color-surface);
+  border-radius: 100%;
   transition: opacity var(--transition);
   outline: none;
+  user-select: none; /* Prevent text selection */
+  cursor: pointer; /* Indicate interactive element */
 }
 
 .profileButton:hover,
@@ -57,14 +70,23 @@
 }
 
 .profilePopover {
-  display: flex;
+  display: none; /* Hide by default */
   min-width: 180px;
   max-width: 320px;
   flex-direction: column;
+  position: absolute; /* Position relative to nearest positioned ancestor */
+  top: 100%; /* Position below the profile button */
+  right: 0;
+  z-index: 100; /* Ensure it appears above other elements */
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-small);
+  border-radius: var(--radius-small);
 }
 
 .profilePopoverInfo {
   padding: var(--space-6) var(--space-7);
+  background-color: var(--color-surface-darker); /* Make it more distinguishable */
 }
 
 .profilePopoverActions {
@@ -95,7 +117,7 @@
 
 .profilePopoverButton {
   width: 100%;
-  place-content: center;
+  justify-content: center;
 }
 
 @media (min-width: 1024px) {
@@ -108,6 +130,12 @@
   }
 
   .logo {
-    place-content: flex-start;
+    justify-content: flex-start;
   }
+}
+
+/* Show profile popover on hover */
+.profile:hover .profilePopover,
+.profileButton:focus-visible .profilePopover {
+  display: flex; /* Show the popover */
 }
