@@ -2,15 +2,19 @@
  * These types are used in `/data`
  */
 
+type UserId = string;
+type GroupId = string;
+
 export type User = {
-  id: string;
-  name: string;
-  avatar?: string;
-  color: string;
-  groupIds: string[];
+  readonly id: UserId;
+  readonly name: string;
+  readonly avatar?: string;
+  readonly color: string;
+  readonly groupIds: GroupId[];
 };
 
 export type Group = {
-  id: string;
-  name: string;
+  readonly id: GroupId;
+  readonly name: string;
 };
+
