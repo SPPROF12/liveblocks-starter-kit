@@ -1,7 +1,8 @@
-.inboxHeader {
+/* Inbox header styling */
+.inbox-header {
   display: flex;
-  place-items: center;
-  place-content: space-between;
+  align-items: center; /* center items vertically */
+  justify-content: space-between; /* distribute items evenly along the horizontal line */
   position: sticky;
   top: 0;
   z-index: var(--z-above);
@@ -10,17 +11,20 @@
   padding: var(--space-3) var(--space-3) var(--space-3) var(--space-8);
 }
 
-.inboxHeader h2 {
+/* Inbox header h2 styling */
+.inbox-header h2 {
   font-weight: 500;
 }
 
-.emptyState {
+/* Empty state styling */
+.empty-state {
+  /* Center the content both vertically and horizontally */
   display: flex;
-  min-height: 320px;
   flex-direction: column;
-  color: var(--color-text-lighter);
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
   gap: var(--space-6);
-  place-content: center;
-  place-items: center;
+  color: var(--color-text-lighter);
   text-align: center;
 }
