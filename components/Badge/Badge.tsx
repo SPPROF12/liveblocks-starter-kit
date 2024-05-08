@@ -2,16 +2,26 @@ import clsx from "clsx";
 import { ComponentProps } from "react";
 import styles from "./Badge.module.css";
 
+const LIVEBLOCKS_LINK = "https://liveblocks.io";
+
 export function Badge({
   className,
+  title,
+  testId,
   ...props
-}: Omit<ComponentProps<"a">, "href">) {
+}: {
+  className?: string;
+  title?: string;
+  testId?: string;
+} & Omit<ComponentProps<"a">, "href">) {
   return (
     <a
       className={clsx(className, styles.badge)}
-      href="https://liveblocks.io"
-      rel="noreferrer"
+      href={LIVEBLOCKS_LINK}
+      rel="noopener noreferrer"
+      title={title}
       target="_blank"
+      data-testid={testId}
       {...props}
     >
       <picture>
