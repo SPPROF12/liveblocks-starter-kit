@@ -1,17 +1,39 @@
+:root {
+  --reset-box-sizing: border-box;
+  --reset-line-height: 1.5;
+  --reset-tab-size: 4;
+  --reset-text-size-adjust: 100%;
+  --reset-font-size: inherit;
+  --reset-font-weight: inherit;
+  --reset-color: inherit;
+  --reset-text-decoration: inherit;
+  --reset-padding: 0;
+  --reset-border: 0;
+  --reset-margin: 0;
+  --reset-font-family: inherit;
+  --reset-font-size-100: 100%;
+  --reset-font-weight-bold: bolder;
+  --reset-appearance: button;
+  --reset-background-color: transparent;
+  --reset-background-image: none;
+  --reset-cursor: pointer;
+  --reset-resize: vertical;
+}
+
 *,
 ::before,
 ::after {
-  box-sizing: border-box;
+  box-sizing: var(--reset-box-sizing);
 }
 
 html {
-  line-height: 1.5;
-  tab-size: 4;
-  -webkit-text-size-adjust: 100%;
+  line-height: var(--reset-line-height);
+  tab-size: var(--reset-tab-size);
+  -webkit-text-size-adjust: var(--reset-text-size-adjust);
 }
 
 body {
-  margin: 0;
+  margin: var(--reset-margin);
   line-height: inherit;
 }
 
@@ -21,25 +43,25 @@ h3,
 h4,
 h5,
 h6 {
-  font-size: inherit;
-  font-weight: inherit;
+  font-size: var(--reset-font-size);
+  font-weight: var(--reset-font-weight);
 }
 
 a {
-  color: inherit;
-  text-decoration: inherit;
+  color: var(--reset-color);
+  text-decoration: var(--reset-text-decoration);
 }
 
 b,
 strong {
-  font-weight: bolder;
+  font-weight: var(--reset-font-weight-bold);
 }
 
 code,
 kbd,
 samp,
 pre {
-  font-size: 1em;
+  font-size: var(--reset-font-size);
 }
 
 small {
@@ -51,13 +73,13 @@ input,
 optgroup,
 select,
 textarea {
-  padding: 0;
-  border: 0;
-  margin: 0;
-  color: inherit;
-  font-family: inherit;
-  font-size: 100%;
-  font-weight: inherit;
+  padding: var(--reset-padding);
+  border: var(--reset-border);
+  margin: var(--reset-margin);
+  color: var(--reset-color);
+  font-family: var(--reset-font-family);
+  font-size: var(--reset-font-size-100);
+  font-weight: var(--reset-font-weight);
   line-height: inherit;
 }
 
@@ -71,9 +93,9 @@ button,
 [type="button"],
 [type="reset"],
 [type="submit"] {
-  appearance: button;
-  background-color: transparent;
-  background-image: none;
+  appearance: var(--reset-appearance);
+  background-color: var(--reset-background-color);
+  background-image: var(--reset-background-image);
 }
 
 :-moz-focusring {
@@ -102,8 +124,8 @@ progress {
 }
 
 ::-webkit-file-upload-button {
-  appearance: button;
-  font: inherit;
+  appearance: var(--reset-appearance);
+  font: var(--reset-font);
 }
 
 summary {
@@ -123,33 +145,33 @@ hr,
 figure,
 p,
 pre {
-  margin: 0;
+  margin: var(--reset-margin);
 }
 
 fieldset {
-  padding: 0;
-  margin: 0;
+  padding: var(--reset-padding);
+  margin: var(--reset-margin);
 }
 
 legend {
-  padding: 0;
+  padding: var(--reset-padding);
 }
 
 ol,
 ul,
 menu {
-  padding: 0;
-  margin: 0;
+  padding: var(--reset-padding);
+  margin: var(--reset-margin);
   list-style: none;
 }
 
 textarea {
-  resize: vertical;
+  resize: var(--reset-resize);
 }
 
 button,
 [role="button"] {
-  cursor: pointer;
+  cursor: var(--reset-cursor);
 }
 
 :disabled {
