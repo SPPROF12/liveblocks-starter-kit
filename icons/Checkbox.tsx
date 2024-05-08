@@ -1,12 +1,18 @@
+import React from "react";
 import { ComponentProps } from "react";
 
-export function CheckboxIcon(props: ComponentProps<"svg">) {
+type CheckboxIconProps = ComponentProps<"svg"> & {
+  size?: number;
+  color?: string;
+};
+
+export function CheckboxIcon({ size = 16, color = "currentColor", ...props }: CheckboxIconProps) {
   return (
     <svg
-      width="16"
-      height="16"
+      width={size}
+      height={size}
       viewBox="0 0 16 16"
-      fill="currentColor"
+      fill={color}
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
