@@ -1,24 +1,21 @@
 "use client";
 
 import { ClientSideSuspense } from "@liveblocks/react";
-import LiveblocksProvider from "@liveblocks/yjs";
-import { CharacterCount } from "@tiptap/extension-character-count";
-import Collaboration from "@tiptap/extension-collaboration";
-import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
-import Highlight from "@tiptap/extension-highlight";
-import { Image } from "@tiptap/extension-image";
-import Link from "@tiptap/extension-link";
-import Placeholder from "@tiptap/extension-placeholder";
-import TaskList from "@tiptap/extension-task-list";
-import { TextAlign } from "@tiptap/extension-text-align";
-import { Typography } from "@tiptap/extension-typography";
-import Youtube from "@tiptap/extension-youtube";
+import { LiveblocksProvider, Room, Self } from "@liveblocks/yjs";
+import {
+  CharacterCount,
+  Collaboration,
+  CollaborationCursor,
+  Highlight,
+  Image,
+  Link,
+  Placeholder,
+  TextAlign,
+  Typography,
+  Youtube,
+} from "@tiptap/extension-react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { EditorView } from "prosemirror-view";
-import { useEffect, useState } from "react";
-import * as Y from "yjs";
-import { useRoom, useSelf } from "@/liveblocks.config";
 import { DocumentSpinner } from "@/primitives/Spinner";
 import { LiveblocksCommentsHighlight } from "./comment-highlight";
 import { CustomTaskItem } from "./CustomTaskItem";
@@ -39,47 +36,42 @@ export function TextEditor() {
 // Collaborative text editor with simple rich text and live cursors
 export function Editor() {
   const room = useRoom();
-  const [doc, setDoc] = useState<Y.Doc>();
-  const [provider, setProvider] = useState<any>();
+  const [provider, setProvider] = useState<ReturnType<typeof LiveblocksProvider> | null>(null);
 
   // Set up Liveblocks Yjs provider
   useEffect(() => {
+    if (!room) return;
+
     const yDoc = new Y.Doc();
     const yProvider = new LiveblocksProvider(room, yDoc);
-    setDoc(yDoc);
     setProvider(yProvider);
 
     return () => {
-      yDoc?.destroy();
-      yProvider?.destroy();
+      yDoc.destroy();
+      yProvider.destroy();
     };
   }, [room]);
 
-  if (!doc || !provider) {
+  if (!provider) {
     return null;
   }
 
-  return <TiptapEditor doc={doc} provider={provider} />;
+  return <TiptapEditor provider={provider} />;
 }
 
 type EditorProps = {
-  doc: Y.Doc;
-  provider: any;
+  provider: ReturnType<typeof LiveblocksProvider>;
 };
 
-function TiptapEditor({ doc, provider }: EditorProps) {
-  // Get user info from Liveblocks authentication endpoint
-  const { name, color, avatar: picture } = useSelf((me) => me.info);
-
-  // Check if user has write access in current room
-  const canWrite = useSelf((me) => me.canWrite);
+function TiptapEditor({ provider }: EditorProps) {
+  const { name, color, avatar: picture } = useSelf((me: Self) => me.info);
+  const canWrite = useSelf((me: Self) => me.canWrite);
 
   // Set up editor with plugins, and place user info into Yjs awareness and cursors
   const editor = useEditor({
     editable: canWrite,
     editorProps: {
       attributes: {
-        // Add styles to editor element
         class: styles.editor,
       },
     },
@@ -175,11 +167,11 @@ function TiptapEditor({ doc, provider }: EditorProps) {
       }),
       // Register the document with Tiptap
       Collaboration.configure({
-        document: doc,
+        document: provider.awareness.getDocument(),
       }),
       // Attach provider and user info
       CollaborationCursor.configure({
-        provider: provider,
+        provider,
         user: {
           name,
           color,
