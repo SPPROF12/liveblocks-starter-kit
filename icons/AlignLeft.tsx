@@ -1,6 +1,8 @@
-import { ComponentProps } from "react";
+import React from "react";
 
-export function AlignLeftIcon(props: ComponentProps<"svg">) {
+type AlignIconProps = React.ComponentPropsWithoutRef<"svg">;
+
+export function AlignLeftIcon(props: AlignIconProps) {
   return (
     <svg
       width="20"
