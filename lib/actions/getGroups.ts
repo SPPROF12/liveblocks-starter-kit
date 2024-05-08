@@ -13,10 +13,10 @@ import { DocumentGroup, Group } from "@/types";
  */
 export async function getGroups(groupIds: DocumentGroup["id"][]) {
   // Get all groups
-  const groups = await Promise.all(
-    groupIds.map((groupId) => getGroup(groupId))
-  );
+  const groups = await Promise.all(groupIds.map(getGroup)).catch((error) => {
+    throw new Error(`Error fetching groups: ${error.message}`);
+  });
 
   // Filter out draft groups or any that didn't return
-  return groups.filter((group) => group) as Group[];
+  return groups.filter((group) => group !== null && group !== undefined) as Group[];
 }
