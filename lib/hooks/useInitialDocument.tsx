@@ -1,14 +1,19 @@
 import { ReactNode, createContext, useContext } from "react";
 import { Document } from "@/types";
 
-const DocumentContext = createContext<Document | null>(null);
+type DocumentContextType = Document | null;
+
+const DocumentContext = createContext<DocumentContextType>(null);
 
 type Props = {
   initialDocument: Document;
   children: ReactNode;
 };
 
-export function InitialDocumentProvider({ initialDocument, children }: Props) {
+export function InitialDocumentProvider({
+  initialDocument,
+  children,
+}: Props) {
   return (
     <DocumentContext.Provider value={initialDocument}>
       {children}
@@ -16,12 +21,15 @@ export function InitialDocumentProvider({ initialDocument, children }: Props) {
   );
 }
 
-export function useInitialDocument() {
+type UseInitialDocumentReturnType = Document & { hasDocument: true };
+
+export function useInitialDocument(): UseInitialDocumentReturnType {
   const document = useContext(DocumentContext);
 
   if (!document) {
-    throw Error("No document passed to DocumentProvider");
+    throw new Error("No document passed to DocumentProvider");
   }
 
-  return document;
+  return { ...document, hasDocument: true };
 }
+
