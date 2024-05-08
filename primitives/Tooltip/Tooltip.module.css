@@ -1,9 +1,9 @@
+/* Animations */
 @keyframes up {
   0% {
     opacity: 0;
     transform: translateY(var(--space-3));
   }
-
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -15,29 +15,40 @@
     opacity: 0;
     transform: translateY(calc(-1 * var(--space-3)));
   }
-
   100% {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
+/* Tooltip styles */
 .tooltip {
+  /* Positioning */
   z-index: var(--z-above);
+
+  /* Sizing and spacing */
   padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-sm);
+
+  /* Border and background */
   border: 1px solid var(--color-tooltip-border);
   background: var(--color-tooltip);
-  border-radius: var(--radius-sm);
   box-shadow: var(--shadow-lg);
+
+  /* Text */
   color: var(--color-tooltip-text);
   font-size: var(--size-sm);
   font-weight: 500;
-  animation: 0.15s ease-in-out;
+
+  /* Animation */
+  animation: 0.2s ease-in-out;
 }
 
+/* Tooltip side-specific styles */
 .tooltip[data-side="top"] {
   animation-name: up;
 }
+
 .tooltip[data-side="bottom"] {
   animation-name: down;
 }
