@@ -1,6 +1,7 @@
-import { ComponentProps } from "react";
+import React from "react";
+import { ComponentProps, SVGProps } from "react";
 
-export function SignOutIcon(props: ComponentProps<"svg">) {
+export function SignOutIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       width="16"
@@ -16,7 +17,6 @@ export function SignOutIcon(props: ComponentProps<"svg">) {
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        vectorEffect="non-scaling-stroke"
       />
     </svg>
   );
