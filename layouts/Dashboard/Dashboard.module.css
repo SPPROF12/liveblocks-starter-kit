@@ -1,12 +1,23 @@
-.container {
+:root {
   --aside-width: 280px;
+  --header-height: 64px;
+  --header-border-bottom: 1px solid var(--color-border);
+  --surface-elevated: var(--color-surface-elevated);
+  --surface: var(--color-surface);
+  --border: var(--color-border);
+}
 
+body {
+  margin: 0;
+}
+
+.container {
   display: grid;
   width: 100%;
   min-height: 100vh;
-  background: var(--color-surface);
+  background: var(--surface);
   grid-template-areas:
-    "."
+    "header"
     "main";
   grid-template-columns: 1fr;
   grid-template-rows: var(--header-height) 1fr;
@@ -18,20 +29,20 @@
   top: 0;
   width: 100%;
   height: var(--header-height);
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface-elevated);
+  border-bottom: var(--header-border-bottom);
+  background: var(--surface-elevated);
 }
 
 .aside {
   position: fixed;
   z-index: var(--z-above);
-  top: var(--header-height);
+  top: calc(var(--header-height) + 1px);
   display: none;
   width: var(--aside-width);
   max-width: 80vw;
   height: calc(100vh - var(--header-height));
-  border-right: 1px solid var(--color-border);
-  background: var(--color-surface-elevated);
+  border-right: 1px solid var(--border);
+  background: var(--surface-elevated);
 }
 
 .aside[data-open] {
@@ -41,13 +52,14 @@
 .main {
   position: relative;
   grid-area: main;
+  padding-top: var(--header-height);
 }
 
 @media (min-width: 1024px) {
   .container {
     grid-template-areas:
-      ". ."
-      ". main";
+      "header header"
+      "aside main";
     grid-template-columns: var(--aside-width) 1fr;
     grid-template-rows: var(--header-height) 1fr;
   }
