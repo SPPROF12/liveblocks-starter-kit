@@ -11,6 +11,14 @@ type Props = {
   documentId: Document["id"];
 };
 
+type Session = {
+  user: {
+    info: {
+      id: string;
+    };
+  };
+};
+
 /**
  * Remove Group Access
  *
@@ -21,16 +29,12 @@ type Props = {
  * @param documentId - The document id
  */
 export async function removeGroupAccess({ groupId, documentId }: Props) {
-  let session;
-  let room;
-  let group;
+  let session: Session | null = null;
+  let room: any = null;
+  let group: DocumentGroup | null = null;
   try {
-    // Get session and room
-    const result = await Promise.all([
-      auth(),
-      liveblocks.getRoom(documentId),
-      getGroup(groupId),
-    ]);
+    // Get session, room and group
+    const result = await Promise.all([auth(), liveblocks.getRoom(documentId), getGroup(groupId)]);
     session = result[0];
     room = result[1];
     group = result[2];
@@ -57,15 +61,7 @@ export async function removeGroupAccess({ groupId, documentId }: Props) {
   }
 
   // Check current logged-in user is set as a user with id, ignoring groupIds and default access
-  if (
-    !userAllowedInRoom({
-      accessAllowed: "write",
-      checkAccessLevel: "user",
-      userId: session.user.info.id,
-      groupIds: [],
-      room,
-    })
-  ) {
+  if (!userAllowedInRoom({ accessAllowed: "write", checkAccessLevel: "user", userId: session.user.info.id, groupIds: [], room })) {
     return {
       error: {
         code: 403,
@@ -103,7 +99,7 @@ export async function removeGroupAccess({ groupId, documentId }: Props) {
   };
 
   // Update the room with the new collaborators
-  let updatedRoom;
+  let updatedRoom: any = null;
   try {
     updatedRoom = await liveblocks.updateRoom(documentId, {
       groupsAccesses,
@@ -128,7 +124,25 @@ export async function removeGroupAccess({ groupId, documentId }: Props) {
     };
   }
 
-  // If successful, convert room to a list of groups and send
-  const result: DocumentGroup[] = await buildDocumentGroups(updatedRoom);
-  return { data: result };
+  // Check if the group was successfully removed
+  if (updatedRoom.groupsAccesses[groupId] === null) {
+    // If successful, convert room to a list of groups and send
+    const result: DocumentGroup[] = await buildDocumentGroups(updatedRoom);
+    return {
+      success: {
+        code: 200,
+        message: "Group access removed successfully",
+        data: result,
+      },
+    };
+  } else {
+    return {
+      error: {
+        code: 500,
+        message: "Error removing group access",
+        suggestion: "Please refresh the page and try again",
+      },
+    };
+  }
 }
+
