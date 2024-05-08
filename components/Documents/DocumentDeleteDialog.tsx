@@ -7,7 +7,8 @@ import styles from "./DocumentDeleteDialog.module.css";
 interface Props
   extends Omit<ComponentProps<typeof Dialog>, "content" | "title"> {
   documentId: string;
-  onDeleteDocument: () => void;
+  onDeleteDocument?: () => void;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function DocumentDeleteDialog({
@@ -22,15 +23,20 @@ export function DocumentDeleteDialog({
       return;
     }
 
-    const { error } = await deleteDocument({
-      documentId,
-    });
+    try {
+      const { error } = await deleteDocument({
+        documentId,
+      });
 
-    onOpenChange(false);
-    onDeleteDocument();
+      if (error) {
+        throw error;
+      }
 
-    if (error) {
-      return;
+      onOpenChange(false);
+      onDeleteDocument();
+    } catch (error) {
+      // Add error handling here
+      console.error(error);
     }
   }
 
