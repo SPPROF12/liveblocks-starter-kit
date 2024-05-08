@@ -4,13 +4,13 @@ import { CSSProperties, useCallback, useEffect, useState } from "react";
 import { CheckIcon, SelectIcon } from "../../icons";
 import styles from "./Select.module.css";
 
-interface Item extends RadixSelect.SelectItemProps {
+type Item = RadixSelect.SelectItemProps & {
   value: string;
   title?: string;
   description?: string;
-}
+};
 
-interface Props extends Omit<RadixSelect.SelectProps, "onValueChange"> {
+type Props = Omit<RadixSelect.SelectProps, "onValueChange"> & {
   variant?: "regular" | "subtle";
   initialValue?: string;
   value?: string;
@@ -19,7 +19,17 @@ interface Props extends Omit<RadixSelect.SelectProps, "onValueChange"> {
   placeholder?: RadixSelect.SelectValueProps["placeholder"];
   aboveOverlay?: boolean;
   className?: RadixSelect.SelectTriggerProps["className"];
-}
+};
+
+const getPrefixClasses = (variant: Props["variant"]) =>
+  clsx(styles.trigger, {
+    [styles.triggerSubtle]: variant === "subtle",
+  });
+
+const getContentClasses = (aboveOverlay: Props["aboveOverlay"]) =>
+  clsx(styles.select, {
+    [styles.aboveOverlay]: aboveOverlay,
+  });
 
 export function Select({
   variant = "regular",
@@ -32,11 +42,11 @@ export function Select({
   className,
   ...props
 }: Props) {
-  const [internalValue, setInternalValue] = useState(initialValue);
+  const [internalValue, setInternalValue] = useState<string | null>(initialValue);
 
   const handleValueChange = useCallback(
-    (newValue: string) => {
-      if (newValue !== undefined) {
+    (newValue: string | null) => {
+      if (newValue !== null) {
         setInternalValue(newValue);
         onChange?.(newValue);
       }
@@ -56,9 +66,7 @@ export function Select({
       {...props}
     >
       <RadixSelect.Trigger
-        className={clsx(className, styles.trigger, {
-          [styles.triggerSubtle]: variant === "subtle",
-        })}
+        className={getPrefixClasses(variant)}
       >
         <RadixSelect.Value
           placeholder={placeholder}
@@ -70,7 +78,7 @@ export function Select({
       </RadixSelect.Trigger>
       <RadixSelect.Portal>
         <RadixSelect.Content
-          className={styles.select}
+          className={getContentClasses(aboveOverlay)}
           style={
             {
               zIndex: aboveOverlay ? "var(--z-overlay)" : undefined,
@@ -78,12 +86,13 @@ export function Select({
           }
         >
           <RadixSelect.Viewport>
-            {items.map(({ value, title, description, ...props }) => (
+            {items.map((item) => (
               <RadixSelect.Item
-                key={value}
-                value={value}
+                key={item.value}
+                value={item.value}
+                disabled={item.disabled}
                 className={styles.item}
-                {...props}
+                {...item}
               >
                 <div className={styles.itemIndicator}>
                   <RadixSelect.ItemIndicator>
@@ -99,11 +108,11 @@ export function Select({
                 </div>
                 <div className={styles.itemInfo}>
                   <RadixSelect.ItemText className={styles.itemTitle}>
-                    {title ?? value}
+                    {item.title ?? item.value}
                   </RadixSelect.ItemText>
-                  {description && (
+                  {item.description && (
                     <span className={styles.itemDescription}>
-                      {description}
+                      {item.description}
                     </span>
                   )}
                 </div>
