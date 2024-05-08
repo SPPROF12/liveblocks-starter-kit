@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
-import { ComponentProps, useMemo } from "react";
+import { ComponentPropsWithoutRef, ReactNode, useMemo } from "react";
 import {
   DASHBOARD_DRAFTS_URL,
   DASHBOARD_GROUP_URL,
@@ -12,19 +12,23 @@ import { Group } from "@/types";
 import { normalizeTrailingSlash } from "@/utils";
 import styles from "./DashboardSidebar.module.css";
 
-interface Props extends ComponentProps<"div"> {
+interface Props extends ComponentPropsWithoutRef<"div"> {
   groups: Group[];
 }
 
 interface SidebarLinkProps
-  extends Omit<ComponentProps<typeof LinkButton>, "href"> {
-  href: string;
+  extends Omit<ComponentPropsWithRef<typeof LinkButton>, "href"> {
+  href: typeof DASHBOARD_URL | typeof DASHBOARD_DRAFTS_URL | typeof DASHBOARD_GROUP_URL extends const infer T
+    ? T[number]
+    : never;
+  icon: ReactNode;
 }
 
 function SidebarLink({
   href,
   children,
   className,
+  icon,
   ...props
 }: SidebarLinkProps) {
   const pathname = usePathname();
@@ -39,8 +43,10 @@ function SidebarLink({
       data-active={isActive || undefined}
       href={href}
       variant="subtle"
+      as={href}
       {...props}
     >
+      {icon}
       {children}
     </LinkButton>
   );
@@ -84,4 +90,9 @@ export function DashboardSidebar({ className, groups, ...props }: Props) {
       </nav>
     </div>
   );
+}
+
+interface Group {
+  id: string;
+  name: string;
 }
