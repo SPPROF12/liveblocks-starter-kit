@@ -1,6 +1,9 @@
-import { ComponentProps } from "react";
+import React from "react";
+import { ComponentProps, SVGProps } from "react";
 
-export function SignInIcon(props: ComponentProps<"svg">) {
+type SignInIconProps = ComponentProps<"svg"> & SVGProps<SVGSVGElement>;
+
+export function SignInIcon(props: SignInIconProps) {
   return (
     <svg
       width="16"
