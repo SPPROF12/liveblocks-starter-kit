@@ -5,9 +5,12 @@
   border-radius: var(--radius-sm);
   font-size: var(--size-sm);
   color: var(--color-text-light);
-  transition: var(--transition);
+  transition: background 0.3s, color 0.3s, opacity 0.3s;
   transition-property: background, color, opacity;
   outline: none;
+  -webkit-transition: background 0.3s, color 0.3s, opacity 0.3s;
+  -moz-transition: background 0.3s, color 0.3s, opacity 0.3s;
+  -o-transition: background 0.3s, color 0.3s, opacity 0.3s;
 }
 
 .input:hover,
