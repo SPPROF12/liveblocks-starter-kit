@@ -1,9 +1,12 @@
-import clsx from "clsx";
+import React from "react";
+import clsx, { CSSModule } from "clsx";
 import { ComponentProps } from "react";
 import styles from "./Container.module.css";
 
+type Size = "small" | "medium" | "large";
+
 interface Props extends ComponentProps<"div"> {
-  size?: "small" | "medium" | "large";
+  size?: Size;
 }
 
 export function Container({
@@ -12,16 +15,27 @@ export function Container({
   children,
   ...props
 }: Props) {
+  const containerClass = styles.container as CSSModule;
+  const sizeClass = (() => {
+    switch (size) {
+      case "small":
+        return styles.containerSmall;
+      case "medium":
+        return styles.containerMedium;
+      case "large":
+        return styles.containerLarge;
+      default:
+        return "";
+    }
+  })();
+
   return (
     <div
-      className={clsx(className, styles.container, {
-        [styles.containerSmall]: size === "small",
-        [styles.containerMedium]: size === "medium",
-        [styles.containerLarge]: size === "large",
-      })}
+      className={clsx(containerClass, sizeClass, className)}
       {...props}
     >
       {children}
     </div>
   );
 }
+
