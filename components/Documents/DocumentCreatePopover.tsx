@@ -1,47 +1,66 @@
 import { ComponentProps, useState } from "react";
 import { PlusIcon } from "@/icons";
 import { createDocument } from "@/lib/actions";
-import { Button } from "@/primitives/Button";
-import { Popover } from "@/primitives/Popover";
+import { Button, Popover } from "@/primitives/Button";
 import { Document, DocumentGroup, DocumentType, DocumentUser } from "@/types";
 import styles from "./DocumentCreatePopover.module.css";
 
-interface Props extends Omit<ComponentProps<typeof Popover>, "content"> {
-  documentName?: Document["name"];
-  draft: Document["draft"];
-  groupIds?: DocumentGroup["id"][];
-  userId: DocumentUser["id"];
+interface Props
+  extends Omit<ComponentProps<typeof Popover>, "content">,
+    Pick<Document, "draft" | "name">,
+    Pick<DocumentUser, "id">,
+    Pick<DocumentGroup, "id">[] {
+  createDocument: (
+    document: Omit<Document, "id" | "createdAt" | "updatedAt"> & {
+      groupIds?: DocumentGroup["id"][] | undefined;
+    },
+    navigate: boolean
+  ) => Promise<{ data?: Document; error?: Error } | null>;
 }
 
 export function DocumentCreatePopover({
   groupIds,
   userId,
   draft,
+  name: documentName,
+  createDocument,
   children,
   ...props
 }: Props) {
   const [disableButtons, setDisableButtons] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Create a new document, then navigate to the document's URL location
-  async function createNewDocument(name: string, type: DocumentType) {
+  const createNewDocument = async (name: string, type: DocumentType) => {
+    if (!createDocument) return;
+
     setDisableButtons(true);
-    const result = await createDocument(
-      {
-        name,
-        type,
-        userId,
-        draft,
-        groupIds: draft ? undefined : groupIds,
-      },
-      true
-    );
+    setLoading(true);
 
-    // If this runs, there's an error and the redirect failed
-    if (!result || result?.error || !result.data) {
+    try {
+      const result = await createDocument(
+        {
+          name,
+          type,
+          userId,
+          draft,
+          groupIds: draft ? undefined : groupIds,
+        },
+        true
+      );
+
+      if (!result || result?.error || !result.data) {
+        setDisableButtons(false);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(false);
+    } catch (error) {
       setDisableButtons(false);
-      return;
+      setLoading(false);
+      console.error(error);
     }
-  }
+  };
 
   return (
     <Popover
@@ -53,7 +72,8 @@ export function DocumentCreatePopover({
               createNewDocument("Untitled", "text");
             }}
             variant="subtle"
-            disabled={disableButtons}
+            disabled={disableButtons || loading}
+            key="text"
           >
             Text
           </Button>
@@ -63,20 +83,24 @@ export function DocumentCreatePopover({
               createNewDocument("Untitled", "whiteboard");
             }}
             variant="subtle"
-            disabled={disableButtons}
+            disabled={disableButtons || loading}
+            key="whiteboard"
           >
             Whiteboard
           </Button>
-          <Button
-            disabled
-            icon={<PlusIcon />}
-            onClick={() => {
-              createNewDocument("Untitled", "spreadsheet");
-            }}
-            variant="subtle"
-          >
-            Spreadsheet
-          </Button>
+          {createDocument && (
+            <Button
+              icon={<PlusIcon />}
+              onClick={() => {
+                createNewDocument("Untitled", "spreadsheet");
+              }}
+              variant="subtle"
+              disabled={disableButtons || loading}
+              key="spreadsheet"
+            >
+              Spreadsheet
+            </Button>
+          )}
         </div>
       }
       modal
@@ -87,3 +111,4 @@ export function DocumentCreatePopover({
     </Popover>
   );
 }
+
