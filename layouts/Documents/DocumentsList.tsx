@@ -1,5 +1,3 @@
-"use client";
-
 import clsx from "clsx";
 import { useSession } from "next-auth/react";
 import { ComponentProps, useMemo, useState } from "react";
@@ -9,8 +7,7 @@ import {
 } from "@/components/Documents";
 import { DocumentRowGroup } from "@/components/Documents/DocumentRowGroup";
 import { PlusIcon } from "@/icons";
-import { GetDocumentsProps } from "@/lib/actions";
-import { usePaginatedDocumentsSWR } from "@/lib/hooks";
+import { GetDocumentsProps, usePaginatedDocumentsSWR } from "@/lib/actions";
 import { Button } from "@/primitives/Button";
 import { Container } from "@/primitives/Container";
 import { Select } from "@/primitives/Select";
@@ -22,9 +19,19 @@ import styles from "./DocumentsList.module.css";
 // Load `x` documents at a time
 const DOCUMENT_LOAD_LIMIT = 10;
 
-interface Props extends ComponentProps<"div"> {
+type DocumentsListProps = ComponentProps<"div"> & {
   filter?: "all" | "drafts" | "group";
   group?: Group;
+};
+
+async function getDocuments({
+  documentType,
+  userId,
+  groupIds,
+  drafts,
+  limit,
+}: GetDocumentsProps) {
+  // Implement the getDocuments function here
 }
 
 export function DocumentsList({
@@ -32,9 +39,13 @@ export function DocumentsList({
   group,
   className,
   ...props
-}: Props) {
+}: DocumentsListProps) {
   const { data: session } = useSession();
   const [documentType, setDocumentType] = useState<DocumentType | "all">("all");
+  const [isLoadingMoreDocuments, setIsLoadingMoreDocuments] =
+    useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isNoDocuments, setIsNoDocuments] = useState(false);
 
   // Return `getDocuments` params for the current filters/group
   const getDocumentsOptions: GetDocumentsProps | null = useMemo(() => {
@@ -82,13 +93,22 @@ export function DocumentsList({
     isLoadingInitialData,
     isLoadingMore,
     isEmpty,
-    isReachingEnd,
     // error,
     // isValidating,
     // isRefreshing,
   } = usePaginatedDocumentsSWR(getDocumentsOptions, {
     refreshInterval: 10000,
   });
+
+  const handleDocumentTypeChange = (value: "all" | DocumentType) => {
+    setDocumentType(value);
+    revalidateDocuments();
+  };
+
+  const handleShowMore = async () => {
+    setIsLoadingMoreDocuments(true);
+    setSize(size + 1);
+  };
 
   const documentsPages = data ?? [];
 
@@ -122,6 +142,26 @@ export function DocumentsList({
     </DocumentCreatePopover>
   );
 
+  if (isLoadingInitialData) {
+    return (
+      <Container
+        size="small"
+        className={clsx(className, styles.documents)}
+        {...props}
+      >
+        <div className={styles.container}>
+          <DocumentRowSkeleton className={styles.row} />
+          <DocumentRowSkeleton className={styles.row} />
+          <DocumentRowSkeleton className={styles.row} />
+        </div>
+      </Container>
+    );
+  }
+
+  if (isEmpty && !isNoDocuments) {
+    setIsNoDocuments(true);
+  }
+
   return (
     <Container
       size="small"
@@ -141,10 +181,7 @@ export function DocumentsList({
               { value: "whiteboard", title: "Whiteboard" },
               { value: "spreadsheet", title: "Spreadsheet", disabled: true },
             ]}
-            onChange={(value: "all" | DocumentType) => {
-              setDocumentType(value);
-              revalidateDocuments();
-            }}
+            onChange={handleDocumentTypeChange}
             className={styles.headerSelect}
           />
           {createDocumentButton}
@@ -152,39 +189,31 @@ export function DocumentsList({
       </div>
 
       <div className={styles.container}>
-        {!isLoadingInitialData ? (
-          !isEmpty ? (
-            <>
-              {documentsPages.map((documentPage) => (
-                <DocumentRowGroup
-                  key={documentPage.nextCursor}
-                  documents={documentPage.documents}
-                  revalidateDocuments={revalidateDocuments}
-                />
-              ))}
-              {!isReachingEnd ? (
-                <div className={styles.actions}>
-                  <Button
-                    disabled={isLoadingMore}
-                    onClick={() => setSize(size + 1)}
-                    icon={isLoadingMore ? <Spinner /> : null}
-                  >
-                    {isLoadingMore ? "Loading…" : "Show more"}
-                  </Button>
-                </div>
-              ) : null}
-            </>
-          ) : (
-            <div className={styles.emptyState}>
-              <p>No documents yet.</p>
-              {createDocumentButton}
-            </div>
-          )
+        {isNoDocuments ? (
+          <div className={styles.emptyState}>
+            <p>No documents yet.</p>
+            {createDocumentButton}
+          </div>
         ) : (
           <>
-            <DocumentRowSkeleton className={styles.row} />
-            <DocumentRowSkeleton className={styles.row} />
-            <DocumentRowSkeleton className={styles.row} />
+            {documentsPages.map((documentPage) => (
+              <DocumentRowGroup
+                key={documentPage.nextCursor}
+                documents={documentPage.documents}
+                revalidateDocuments={revalidateDocuments}
+              />
+            ))}
+            {!isReachingEnd ? (
+              <div className={styles.actions}>
+                <Button
+                  disabled={isLoadingMoreDocuments}
+                  onClick={handleShowMore}
+                  icon={isLoadingMoreDocuments ? <Spinner /> : null}
+                >
+                  {isLoadingMoreDocuments ? "Loading…" : "Show more"}
+                </Button>
+              </div>
+            ) : null}
           </>
         )}
       </div>
