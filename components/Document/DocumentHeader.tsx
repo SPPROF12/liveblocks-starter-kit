@@ -1,7 +1,7 @@
 import { ClientSideSuspense } from "@liveblocks/react";
 import clsx from "clsx";
-import Link from "next/link";
-import { ComponentProps } from "react";
+import Link, { LinkProps } from "next/link";
+import { ComponentProps, ReactNode, useEffect, useState } from "react";
 import { InboxPopover } from "@/components/Inbox";
 import { ShareIcon } from "@/icons";
 import { renameDocument } from "@/lib/actions";
@@ -10,7 +10,6 @@ import { Button } from "@/primitives/Button";
 import { Skeleton } from "@/primitives/Skeleton";
 import { Document } from "@/types";
 import { Logo } from "../Logo";
-import { ShareDialog } from "../ShareDialog";
 import { DocumentHeaderAvatars } from "./DocumentHeaderAvatars";
 import { DocumentHeaderName } from "./DocumentHeaderName";
 import styles from "./DocumentHeader.module.css";
@@ -19,30 +18,48 @@ interface Props extends ComponentProps<"header"> {
   documentId: Document["id"];
 }
 
+interface DocumentHeaderNameProps {
+  onDocumentRename: (name: string) => void;
+  loading?: boolean;
+}
+
+function isDocumentHeaderNameProps(
+  props: ComponentProps<"div"> | DocumentHeaderNameProps
+): props is DocumentHeaderNameProps {
+  return (props as DocumentHeaderNameProps).onDocumentRename !== undefined;
+}
+
 export function DocumentHeader({ documentId, className, ...props }: Props) {
   const initialDocument = useInitialDocument();
+  const [documentName, setDocumentName] = useState(initialDocument.name);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    setDocumentName(initialDocument.name);
+  }, [initialDocument.name]);
 
   return (
     <header className={clsx(className, styles.header)} {...props}>
       <div className={styles.logo}>
-        <Link href="/" className={styles.logoLink}>
+        <Link href="/" key="logo-link" title="Homepage" className={styles.logoLink}>
           <Logo />
         </Link>
       </div>
       <div className={styles.document}>
-        <ClientSideSuspense
-          fallback={
-            <span className={styles.documentNameFallback}>
-              {initialDocument.name}
-            </span>
-          }
-        >
-          {() => (
-            <DocumentHeaderName
-              onDocumentRename={(name) => renameDocument({ documentId, name })}
-            />
-          )}
-        </ClientSideSuspense>
+        {isDocumentHeaderNameProps(props) ? (
+          <DocumentHeaderName
+            onDocumentRename={(name) => {
+              setDocumentName(name);
+              renameDocument({ documentId, name });
+            }}
+            loading={loading}
+          >
+            {documentName}
+          </DocumentHeaderName>
+        ) : (
+          <span className={styles.documentNameFallback}>{documentName}</span>
+        )}
       </div>
       <div className={styles.collaboration}>
         <div className={styles.presence}>
@@ -50,13 +67,7 @@ export function DocumentHeader({ documentId, className, ...props }: Props) {
             {() => <DocumentHeaderAvatars />}
           </ClientSideSuspense>
         </div>
-        <ClientSideSuspense
-          fallback={
-            <Button icon={<ShareIcon />} disabled={true}>
-              Share
-            </Button>
-          }
-        >
+        <ClientSideSuspense fallback={null}>
           {() => (
             <ShareDialog>
               <Button icon={<ShareIcon />}>Share</Button>
@@ -73,16 +84,21 @@ export function DocumentHeader({ documentId, className, ...props }: Props) {
 export function DocumentHeaderSkeleton({
   className,
   ...props
-}: ComponentProps<"header">) {
+}: LinkProps) {
   return (
     <header className={clsx(className, styles.header)} {...props}>
       <div className={styles.logo}>
-        <Link href="/">
+        <Link href="/" key="logo-link" title="Homepage" className={styles.logoLink}>
           <Logo />
         </Link>
       </div>
       <div className={styles.document}>
         <Skeleton style={{ width: 120 }} />
+      </div>
+      <div className={styles.collaboration}>
+        <Button icon={<ShareIcon />} disabled={true}>
+          Share
+        </Button>
       </div>
     </header>
   );
