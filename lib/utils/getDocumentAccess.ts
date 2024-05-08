@@ -1,10 +1,12 @@
 import { Document, DocumentAccess, User } from "@/types";
 
-interface Props {
+type DocumentAccessProps = {
   documentAccesses: Document["accesses"];
   groupIds: User["groupIds"];
   userId: User["id"];
-}
+};
+
+type DocumentAccessResult = DocumentAccess | typeof DocumentAccess.NONE;
 
 const accessLevelHierarchy = [
   DocumentAccess.NONE,
@@ -17,34 +19,42 @@ export function getDocumentAccess({
   documentAccesses,
   userId,
   groupIds,
-}: Props) {
-  let accessLevel = documentAccesses.default;
-
-  // If a group id is higher than default access, use this
-  groupIds.forEach((groupId) => {
-    const groupAccess = documentAccesses.groups[groupId];
-    if (
-      accessLevelHierarchy.indexOf(groupAccess) >
-      accessLevelHierarchy.indexOf(accessLevel)
-    ) {
-      accessLevel = groupAccess;
-    }
-  });
-
-  let userAccess = documentAccesses.users[userId];
-
-  // If EDIT access set at user level, give FULL access
-  if (userAccess === DocumentAccess.EDIT) {
-    userAccess = DocumentAccess.FULL;
+}: DocumentAccessProps): DocumentAccessResult {
+  if (!documentAccesses || !documentAccesses.default) {
+    throw new Error("Missing required properties in documentAccesses");
   }
 
-  // If a user id is higher than default access, use this
-  if (
-    accessLevelHierarchy.indexOf(userAccess) >
-    accessLevelHierarchy.indexOf(accessLevel)
-  ) {
-    accessLevel = userAccess;
+  let accessLevel = documentAccesses.default;
+
+  if (groupIds && groupIds.length > 0) {
+    for (const groupId of groupIds) {
+      if (documentAccesses.groups && documentAccesses.groups[groupId] !== undefined) {
+        const groupAccess = documentAccesses.groups[groupId];
+        if (
+          accessLevelHierarchy.indexOf(groupAccess as DocumentAccess) >
+          accessLevelHierarchy.indexOf(accessLevel as DocumentAccess)
+        ) {
+          accessLevel = groupAccess;
+        }
+      }
+    }
+  }
+
+  if (documentAccesses.users && documentAccesses.users[userId] !== undefined) {
+    const userAccess = documentAccesses.users[userId];
+
+    if (userAccess === DocumentAccess.EDIT) {
+      userAccess = DocumentAccess.FULL;
+    }
+
+    if (
+      accessLevelHierarchy.indexOf(userAccess as DocumentAccess) >
+      accessLevelHierarchy.indexOf(accessLevel as DocumentAccess)
+    ) {
+      accessLevel = userAccess;
+    }
   }
 
   return accessLevel;
 }
+
