@@ -3,24 +3,22 @@ import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { ComponentProps, MouseEventHandler } from "react";
 import { CrossIcon, MenuIcon, SignOutIcon } from "@/icons";
-import { Avatar } from "@/primitives/Avatar";
-import { Button } from "@/primitives/Button";
-import { Popover } from "@/primitives/Popover";
+import { Avatar, Button, Popover } from "@/primitives/";
 import { InboxPopover } from "../Inbox";
 import { Logo } from "../Logo";
 import styles from "./DashboardHeader.module.css";
 
-interface Props extends ComponentProps<"header"> {
+interface DashboardHeaderProps extends ComponentProps<"header"> {
   isOpen: boolean;
   onMenuClick: MouseEventHandler<HTMLButtonElement>;
 }
 
-export function DashboardHeader({
+export default function DashboardHeader({
   isOpen,
   onMenuClick,
   className,
   ...props
-}: Props) {
+}: DashboardHeaderProps) {
   const { data: session } = useSession();
 
   return (
@@ -53,8 +51,9 @@ export function DashboardHeader({
                 <div className={styles.profilePopoverActions}>
                   <Button
                     className={styles.profilePopoverButton}
-                    icon={<SignOutIcon />}
+                    icon={<SignOutIcon title="Sign out" />}
                     onClick={() => signOut()}
+                    type="button"
                   >
                     Sign out
                   </Button>
@@ -66,6 +65,7 @@ export function DashboardHeader({
           >
             <button className={styles.profileButton}>
               <Avatar
+                key={session.user.info.id}
                 className={styles.profileAvatar}
                 name={session.user.info.name}
                 size={32}
@@ -75,7 +75,7 @@ export function DashboardHeader({
           </Popover>
         )}
         <div className={styles.profileInbox}>
-          <InboxPopover align="end" sideOffset={4} />
+          <InboxPopover align="end" sideOffset={4} aria-label="Inbox" />
         </div>
       </div>
     </header>
