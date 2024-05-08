@@ -3,7 +3,15 @@ import { ComponentProps, useMemo } from "react";
 import { getContrastingColor } from "@/utils";
 import styles from "./Cursor.module.css";
 
-interface Props extends Omit<ComponentProps<"div">, "color"> {
+type ValidColor = string & { [key: string]: never };
+
+const isValidColor = (color: string): color is ValidColor => {
+  const regex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+  return regex.test(color);
+};
+
+interface Props
+  extends Omit<ComponentProps<"div">, "color" | "textColor"> {
   color: string;
   name: string;
   x: number;
@@ -19,15 +27,18 @@ export function Cursor({
   style,
   ...props
 }: Props) {
-  const textColor = useMemo(
-    () => (color ? getContrastingColor(color) : undefined),
-    [color]
-  );
+  const textColor = useMemo(() => {
+    if (color && isValidColor(color)) {
+      return getContrastingColor(color);
+    } else {
+      return "#000";
+    }
+  }, [color]);
 
   return (
     <div
       className={clsx(className, styles.cursor)}
-      style={{ transform: `translate(${x}px, ${y}px`, ...style }}
+      style={{ transform: `translate(${x}px, ${y}px)`, ...style }}
       {...props}
     >
       <svg
@@ -54,3 +65,4 @@ export function Cursor({
     </div>
   );
 }
+
