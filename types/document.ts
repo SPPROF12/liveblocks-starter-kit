@@ -1,33 +1,20 @@
 import { Group, User } from "./data";
 
+type DocumentAccessKey = "default" | DocumentGroup["id"] | DocumentUser["id"];
+
 /**
  * This is the main type of your Documents.
  * Make sure to edit /lib/server/utils/buildDocuments.ts when adding new
  * properties.
  */
 export type Document = {
-  // Equivalent to Liveblocks room id
   id: string;
-
-  // The document's name
   name: string;
-
-  // Arrays containing access levels
   accesses: DocumentAccesses;
-
-  // The user if of the document's creator
   owner: DocumentUser["id"];
-
-  // When the document was created (Date.toString())
   created: string;
-
-  // When the last user connected (Date.toString())
   lastConnection: string;
-
-  // If the room is a draft (which has no groups or public access) or not
   draft: boolean;
-
-  // The type of document e.g. "canvas"
   type: DocumentType;
 };
 
@@ -43,23 +30,14 @@ export type DocumentUser = User & {
 };
 
 export enum DocumentAccess {
-  // Can edit, read, and modify invited users
   FULL = "full",
-
-  // Can edit and read the document
   EDIT = "edit",
-
-  // Can only read the document
   READONLY = "readonly",
-
-  // Can't view the document
   NONE = "none",
 }
 
 export type DocumentAccesses = {
-  default: DocumentAccess;
-  groups: Record<DocumentGroup["id"], DocumentAccess>;
-  users: Record<DocumentUser["id"], DocumentAccess>;
+  [K in DocumentAccessKey]: DocumentAccess;
 };
 
 // Room metadata used when creating a new document
@@ -76,3 +54,4 @@ export type ErrorData = {
   code?: number;
   suggestion?: string;
 };
+
