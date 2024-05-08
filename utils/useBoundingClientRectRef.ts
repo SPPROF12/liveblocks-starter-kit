@@ -1,4 +1,4 @@
-import { MutableRefObject, useEffect, useRef } from "react";
+import { MutableRefObject, useEffect, useMemo, useRef } from "react";
 
 const initialRect = {
   x: 0,
@@ -21,23 +21,27 @@ export function useBoundingClientRectRef(
 ) {
   const rectRef = useRef<DOMRect>(initialRect);
 
-  useEffect(() => {
-    const updateRect = () => {
-      if (!(ref?.current instanceof Element)) {
-        return;
-      }
+  const updateRect = () => {
+    if (ref.current && ref.current instanceof HTMLElement) {
       rectRef.current = ref.current.getBoundingClientRect();
-    };
+    }
+  };
 
-    window.addEventListener("resize", updateRect);
-    window.addEventListener("orientationchange", updateRect);
-    updateRect();
+  const previousRef = useRef<Element | null>(null);
 
-    return () => {
-      window.removeEventListener("resize", updateRect);
-      window.removeEventListener("orientationchange", updateRect);
-    };
+  useEffect(() => {
+    if (previousRef.current !== ref.current) {
+      window.addEventListener("resize", updateRect);
+      window.addEventListener("orientationchange", updateRect);
+      updateRect();
+
+      return () => {
+        window.removeEventListener("resize", updateRect);
+        window.removeEventListener("orientationchange", updateRect);
+      };
+    }
   }, [ref]);
 
-  return rectRef;
+  return useMemo(() => rectRef, [ref]);
 }
+
