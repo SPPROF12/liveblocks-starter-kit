@@ -1,4 +1,4 @@
-import { ComponentProps } from "react";
+import { ComponentProps, cloneElement } from "react";
 
 export function InboxIcon(props: ComponentProps<"svg">) {
   return (
@@ -8,7 +8,6 @@ export function InboxIcon(props: ComponentProps<"svg">) {
       viewBox="0 0 16 16"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      {...props}
     >
       <path
         d="m2.05 8.85 1.5-4.48A2 2 0 0 1 5.44 3h5.1a2 2 0 0 1 1.9 1.37l1.5 4.48c.03.1.05.2.05.31V11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9.16a1 1 0 0 1 .05-.31Z"
@@ -26,6 +25,7 @@ export function InboxIcon(props: ComponentProps<"svg">) {
         strokeLinejoin="round"
         vectorEffect="non-scaling-stroke"
       />
+      {cloneElement(props.children, props)}
     </svg>
   );
 }
