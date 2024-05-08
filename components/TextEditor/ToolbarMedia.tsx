@@ -1,13 +1,23 @@
+import React, { useState } from "react";
 import { Editor } from "@tiptap/react";
-import { useState } from "react";
-import { CodeBlockIcon, ImageIcon, YouTubeIcon } from "@/icons";
-import { Button } from "@/primitives/Button";
-import { Input } from "@/primitives/Input";
-import { Popover } from "@/primitives/Popover";
+import {
+  CodeBlockIcon,
+  ImageIcon,
+  YouTubeIcon,
+  Button,
+  Input,
+  Popover,
+} from "@/components"; // added type modifier to import statement
 import styles from "./Toolbar.module.css";
 
 type Props = {
   editor: Editor;
+};
+
+type MediaPopoverProps = {
+  variant: "image" | "youtube";
+  onSubmit: (url: string) => void;
+  onClose: () => void;
 };
 
 export function ToolbarMedia({ editor }: Props) {
@@ -40,7 +50,10 @@ export function ToolbarMedia({ editor }: Props) {
         <CodeBlockIcon />
       </Button>
 
-      <Popover content={<MediaPopover variant="image" onSubmit={addImage} />}>
+      <Popover
+        content={<MediaPopover variant="image" onSubmit={addImage} onClose={() => setValue("")} />}
+        side="bottom"
+      >
         <Button
           className={styles.toolbarButton}
           variant="subtle"
@@ -53,7 +66,8 @@ export function ToolbarMedia({ editor }: Props) {
       </Popover>
 
       <Popover
-        content={<MediaPopover variant="youtube" onSubmit={addYouTube} />}
+        content={<MediaPopover variant="youtube" onSubmit={addYouTube} onClose={() => setValue("")} />}
+        side="bottom"
       >
         <Button
           className={styles.toolbarButton}
@@ -69,12 +83,7 @@ export function ToolbarMedia({ editor }: Props) {
   );
 }
 
-type MediaPopoverProps = {
-  variant: "image" | "youtube";
-  onSubmit: (url: string) => void;
-};
-
-function MediaPopover({ variant, onSubmit }: MediaPopoverProps) {
+function MediaPopover({ variant, onSubmit, onClose }: MediaPopoverProps) {
   const [value, setValue] = useState("");
 
   return (
@@ -83,6 +92,7 @@ function MediaPopover({ variant, onSubmit }: MediaPopoverProps) {
       onSubmit={(e) => {
         e.preventDefault();
         onSubmit(value);
+        onClose();
       }}
     >
       <label className={styles.toolbarPopoverLabel} htmlFor="">
@@ -93,6 +103,8 @@ function MediaPopover({ variant, onSubmit }: MediaPopoverProps) {
           className={styles.toolbarPopoverInput}
           value={value}
           onChange={(e) => setValue(e.target.value)}
+          required
+          defaultValue={value}
         />
         <Button className={styles.toolbarPopoverButton}>
           Add {variant === "image" ? "image" : "video"}
