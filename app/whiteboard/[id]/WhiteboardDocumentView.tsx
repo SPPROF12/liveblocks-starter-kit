@@ -20,13 +20,12 @@ export function WhiteboardDocumentView({
   initialDocument,
   initialError,
 }: Props) {
-  const { id, error: queryError } = useParams<{ id: string; error: string }>();
+  const { id, error: queryError } = useParams<{ id: string; error: string }>() || {};
   const [error, setError] = useState<ErrorData | null>(initialError);
 
-  // If error object in params, retrieve it
   useEffect(() => {
     if (queryError) {
-      setError(JSON.parse(decodeURIComponent(queryError as string)));
+      setError(JSON.parse(decodeURIComponent(queryError)));
     }
   }, [queryError]);
 
@@ -34,13 +33,13 @@ export function WhiteboardDocumentView({
     return <ErrorLayout error={error} />;
   }
 
-  if (!initialDocument) {
+  if (!id || !initialDocument) {
     return <DocumentLayout header={<DocumentHeaderSkeleton />} />;
   }
 
   return (
     <RoomProvider
-      id={id as string}
+      id={id}
       initialPresence={{ cursor: null }}
       initialStorage={{ notes: new LiveMap() }}
     >
@@ -54,3 +53,4 @@ export function WhiteboardDocumentView({
     </RoomProvider>
   );
 }
+
