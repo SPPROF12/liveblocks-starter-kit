@@ -1,12 +1,14 @@
-import { ComponentProps } from "react";
+import React from "react";
 
-export function BoldIcon(props: ComponentProps<"svg">) {
+interface BoldIconProps extends React.SVGProps<SVGSVGElement> {}
+
+export function BoldIcon(props: BoldIconProps) {
   return (
     <svg
       width="20"
       height="20"
-      fill="currentColor"
       viewBox="0 0 16 16"
+      fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
