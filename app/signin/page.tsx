@@ -6,25 +6,37 @@ import { NextAuthLogin } from "./NextAuthLogin";
 import styles from "./signin.module.css";
 
 export default async function SignInPage() {
-  const session = await auth();
+  let session, providers, error;
+
+  try {
+    session = await auth();
+    providers = await getProviders();
+  } catch (err) {
+    error = err.message;
+  }
 
   // If logged in, go to dashboard
   if (session) {
     redirect(DASHBOARD_URL);
   }
 
-  const providers = await getProviders();
   return (
     <div className={styles.container}>
       <main className={styles.main}>
         <h2 className={styles.title}>Sign in to your account</h2>
-        {providers && providers.credentials ? (
-          <DemoLogin />
+        {error && <p className={styles.error}>Error: {error}</p>}
+        {providers ? (
+          providers.credentials ? (
+            <DemoLogin />
+          ) : (
+            <NextAuthLogin providers={providers} />
+          )
         ) : (
-          <NextAuthLogin providers={providers} />
+          <p className={styles.loading}>Loading providers...</p>
         )}
       </main>
       <aside className={styles.aside} />
     </div>
   );
 }
+
