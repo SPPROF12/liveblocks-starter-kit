@@ -1,20 +1,33 @@
 import clsx from "clsx";
-import { ComponentProps, ReactNode, forwardRef } from "react";
-import styles from "./Document.module.css";
+import { forwardRef, ComponentProps } from "react";
+import { HTMLAttributes } from "react";
+import "./Document.module.css";
 
-interface Props extends ComponentProps<"div"> {
-  header: ReactNode;
+interface DocumentLayoutProps extends ComponentProps<"div"> {
+  header: React.ReactNode;
 }
 
-export const DocumentLayout = forwardRef<HTMLElement, Props>(
+const DocumentLayout = forwardRef<HTMLDivElement, DocumentLayoutProps>(
   ({ children, header, className, ...props }, ref) => {
     return (
-      <div className={clsx(className, styles.container)} {...props}>
-        <header className={styles.header}>{header}</header>
-        <main className={styles.main} ref={ref}>
-          {children}
-        </main>
+      <div
+        className={clsx(
+          "document-layout",
+          className,
+          "flex",
+          "flex-col",
+          "h-full"
+        )}
+        {...props}
+        ref={ref}
+      >
+        <header className="document-header bg-gray-200 p-4">{header}</header>
+        <main className="document-main flex-grow p-4">{children}</main>
       </div>
     );
   }
 );
+
+DocumentLayout.displayName = "DocumentLayout";
+
+export default DocumentLayout;
