@@ -1,8 +1,9 @@
-import { ComponentProps } from "react";
+import { ComponentProps, SVGProps } from "react";
 
-export function CheckIcon(props: ComponentProps<"svg">) {
+export function CheckIcon(props: ComponentProps<"svg"> & { 'data-testid'?: string }) {
   return (
     <svg
+      data-testid={props['data-testid']}
       width="16"
       height="16"
       viewBox="0 0 16 16"
@@ -18,6 +19,7 @@ export function CheckIcon(props: ComponentProps<"svg">) {
         strokeLinejoin="round"
         vectorEffect="non-scaling-stroke"
       />
+      <title>Checkmark icon</title>
     </svg>
   );
 }
