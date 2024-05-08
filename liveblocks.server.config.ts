@@ -1,13 +1,13 @@
 import { Liveblocks } from "@liveblocks/node";
 import { getProviders } from "@/auth";
 
+// Check if the code is running in a non-browser environment
+const isServer = typeof window === "undefined";
+
 // Your Liveblocks secret key
-export const SECRET_API_KEY = process.env.LIVEBLOCKS_SECRET_KEY;
+const SECRET_API_KEY = process.env.LIVEBLOCKS_SECRET_KEY;
 
-export const liveblocks = new Liveblocks({ secret: SECRET_API_KEY as string });
-
-// ============================================================================
-if (typeof window !== "undefined") {
+if (!isServer && SECRET_API_KEY) {
   console.log();
   console.error(
     "DANGER: You're using data from /liveblocks.server.config.ts on the client"
@@ -28,39 +28,36 @@ Follow the full starter kit guide on https://liveblocks.io/docs/guides/nextjs-st
 `);
 }
 
-(async () => {
-  const providers = await getProviders();
+const liveblocks = new Liveblocks({ secret: SECRET_API_KEY as string });
 
-  if (providers?.github) {
-    if (!process.env.GITHUB_CLIENT_ID || !process.env.GITHUB_CLIENT_SECRET) {
-      console.log(`Your GitHub secrets are missing from .env.local
-
-Example .env.local file:
-GITHUB_CLIENT_ID=sk_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-GITHUB_CLIENT_SECRET=sk_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-Follow the full starter kit guide to learn how to get them:
-https://liveblocks.io/docs/guides/nextjs-starter-kit#github-authentication
-      `);
-    }
-  }
-
-  if (providers?.auth0) {
-    if (
-      !process.env.AUTH0_CLIENT_ID ||
-      !process.env.AUTH0_CLIENT_SECRET ||
-      !process.env.AUTH0_ISSUER_BASE_URL
-    ) {
-      throw new Error(`Your Auth0 secrets are missing from .env.local
+const checkEnvVar = (variable: string, provider: string) => {
+  if (isServer && !process.env[variable]) {
+    console.log(`Your ${provider} secrets are missing from .env.local
 
 Example .env.local file:
-AUTH0_CLIENT_ID=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-AUTH0_CLIENT_SECRET=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-AUTH0_ISSUER_BASE_URL=https://XXXXXXXXXXXXXXXXXX.com
+${variable}=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 Follow the full starter kit guide to learn how to get them:
-https://liveblocks.io/docs/guides/nextjs-starter-kit#auth0-authentication
-      `);
-    }
+https://liveblocks.io/docs/guides/nextjs-starter-kit#${provider.toLowerCase()}-authentication
+    `);
   }
-})();
+};
+
+const providers = await getProviders();
+
+if (providers?.github) {
+  checkEnvVar("GITHUB_CLIENT_ID", "GitHub");
+  checkEnvVar("GITHUB_CLIENT_SECRET", "GitHub");
+}
+
+if (providers?.auth0) {
+  checkEnvVar("AUTH0_CLIENT_ID", "Auth0");
+  checkEnvVar("AUTH0_CLIENT_SECRET", "Auth0");
+  checkEnvVar("AUTH0_ISSUER_BASE_URL", "Auth0");
+}
+
+if (isServer) {
+  (async () => {
+    // Your server-side logic here
+  })();
+}
