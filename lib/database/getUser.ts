@@ -1,5 +1,6 @@
 import { colors } from "@/data/colors";
-import { users } from "@/data/users";
+import { User } from "@/types/User";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * Get User
@@ -7,8 +8,9 @@ import { users } from "@/data/users";
  * Simulates calling your database and returning a user with a seeded random colour
  *
  * @param userId - The user's id
+ * @returns A user object with a random color
  */
-export async function getUser(userId: string) {
+export async function getUser(userId: string): Promise<User | null> {
   const user = users.find((user) => user.id === userId);
 
   if (!user) {
@@ -28,10 +30,15 @@ Check that you've added the user to data/users.ts, for example:
   }
 
   const color = getRandom(colors, userId);
-  return { color, ...user };
+  return { ...user, color, id: user.id || uuidv4() };
 }
 
-export function getRandom<T>(array: T[], seed?: string): T {
+export function getRandom<T>(array: T[] = [], seed?: string): T {
+  if (!array.length) {
+    console.warn("ERROR: The array passed to getRandom is empty.");
+    return array[0];
+  }
+
   const index = seed
     ? Math.abs(hashCode(seed)) % array.length
     : Math.floor(Math.random() * array.length);
@@ -39,7 +46,7 @@ export function getRandom<T>(array: T[], seed?: string): T {
   return array[index];
 }
 
-function hashCode(string: string) {
+function hashCode<T>(string: string): number {
   let hash = 0;
 
   if (string.length > 0) {
@@ -52,3 +59,4 @@ function hashCode(string: string) {
 
   return hash;
 }
+
