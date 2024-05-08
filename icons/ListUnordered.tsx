@@ -1,6 +1,10 @@
-import { ComponentProps } from "react";
+import { SVGProps } from "react";
 
-export function ListUnorderedIcon(props: ComponentProps<"svg">) {
+export function ListUnorderedIcon({
+  className,
+  style,
+  ...svgProps
+}: SVGProps<SVGSVGElement> & { className?: string; style?: React.CSSProperties }) {
   return (
     <svg
       width="20"
@@ -8,7 +12,11 @@ export function ListUnorderedIcon(props: ComponentProps<"svg">) {
       viewBox="0 0 16 16"
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
-      {...props}
+      className={className}
+      style={style}
+      aria-hidden={true}
+      focusable="false"
+      {...svgProps}
     >
       <path
         fillRule="evenodd"
