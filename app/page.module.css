@@ -1,3 +1,21 @@
+/* Global styles */
+:root {
+  --space-20: 20px;
+  --space-10: 10px;
+  --space-9: 9px;
+  --space-6: 6px;
+  --space-12: 12px;
+  --space-4: 4px;
+  --size-2xl: 24px;
+  --size-4xl: 48px;
+  --size-xl: 20px;
+  --size-sm: 14px;
+  --color-text-lighter: #888;
+  --color-border: #ddd;
+  --radius: 4px;
+}
+
+/* Section styles */
 .section {
   margin-top: var(--space-20);
   margin-bottom: var(--space-20);
@@ -9,6 +27,7 @@
   font-weight: 700;
 }
 
+/* Hero section styles */
 .heroTitle {
   max-width: 400px;
   margin-bottom: var(--space-9);
@@ -32,12 +51,14 @@
   gap: var(--space-6);
 }
 
+/* Features grid styles */
 .featuresGrid {
   display: grid;
   gap: var(--space-10);
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
 
+/* Features item styles */
 .featuresFeature {
   padding: var(--space-9);
   border: 1px solid var(--color-border);
