@@ -1,4 +1,4 @@
-.button {
+.btn {
   position: relative;
   display: flex;
   height: var(--space-13);
@@ -6,61 +6,58 @@
   border-radius: var(--radius-sm);
   place-items: center;
   transition: var(--transition);
-  transition-property: background, color, opacity;
   outline: none;
 }
 
-.button:disabled {
+.btn:disabled {
   cursor: default;
   opacity: var(--opacity-disabled);
 }
 
-.iconButton {
+.btn:hover,
+.btn:focus-visible {
+  opacity: var(--opacity-hover);
+}
+
+.icon-btn {
   width: var(--space-13);
   padding: 0;
   place-content: center;
 }
 
-.buttonPrimary {
+.primary {
   background: var(--color-accent);
   color: var(--color-surface-elevated);
 }
 
-.buttonDestructive {
+.destructive {
   background: rgb(var(--color-red));
   color: var(--color-surface-elevated);
 }
 
-.buttonPrimary:hover,
-.buttonPrimary:focus-visible,
-.buttonDestructive:hover,
-.buttonDestructive:focus-visible {
-  opacity: var(--opacity-hover);
-}
-
-.buttonSecondary {
+.secondary {
   background: var(--color-surface);
   color: var(--color-text-light);
 }
 
-.buttonSecondary:hover,
-.buttonSecondary:focus-visible {
+.secondary:hover,
+.secondary:focus-visible {
   background: var(--color-surface-hover);
   color: var(--color-text);
 }
 
-.buttonSubtle {
+.subtle {
   color: var(--color-text-lighter);
 }
 
-.buttonSubtle:not(:disabled):hover,
-.buttonSubtle:not(:disabled):focus-visible,
-.buttonSubtle[data-active] {
+.subtle:not(:disabled):hover,
+.subtle:not(:disabled):focus-visible,
+.subtle[data-active] {
   background: var(--color-surface);
   color: var(--color-text-light);
 }
 
-.button:not(.iconButton) .icon {
+.btn:not(.icon-btn) .icon {
   margin-right: var(--space-4);
   margin-left: calc(-1 * var(--space-1));
 }
