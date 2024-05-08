@@ -1,14 +1,30 @@
-import { ComponentProps } from "react";
+import React from "react";
 
-export function EditIcon(props: ComponentProps<"svg">) {
+type EditIconProps = ComponentProps<"svg"> & {
+  className?: string;
+  title?: string;
+};
+
+const defaultProps = {
+  width: "16",
+  height: "16",
+  viewBox: "0 0 16 16",
+  fill: "none",
+};
+
+export function EditIcon(props: EditIconProps) {
+  const { className, title, ...svgProps } = { ...defaultProps, ...props };
+
   return (
     <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
+      className={className}
+      title={title}
+      width={svgProps.width}
+      height={svgProps.height}
+      viewBox={svgProps.viewBox}
+      fill={svgProps.fill}
       xmlns="http://www.w3.org/2000/svg"
-      {...props}
+      {...svgProps}
     >
       <path
         d="M8 3H4.11111C3.81643 3 3.53381 3.11706 3.32544 3.32544C3.11706 3.53381 3 3.81643 3 4.11111V11.8889C3 12.1836 3.11706 12.4662 3.32544 12.6746C3.53381 12.8829 3.81643 13 4.11111 13H11.8889C12.1836 13 12.4662 12.8829 12.6746 12.6746C12.8829 12.4662 13 12.1836 13 11.8889V8"
