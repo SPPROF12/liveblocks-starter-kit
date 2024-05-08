@@ -3,22 +3,28 @@ import { ComponentProps, useMemo } from "react";
 import { GitHubIcon } from "@/icons";
 import { LinkButton } from "@/primitives/Button";
 import { Container } from "@/primitives/Container";
-import styles from "./MarketingFooter.module.css";
+import { MarketingFooterProps } from "./MarketingFooter.types";
 
 export function MarketingFooter({
   className,
+  marginBottom,
   ...props
-}: ComponentProps<"footer">) {
+}: MarketingFooterProps) {
   const year = useMemo(() => new Date().getFullYear(), []);
 
   return (
-    <footer className={clsx(className, styles.footer)} {...props}>
-      <Container className={styles.container}>
+    <footer
+      className={clsx(className, styles.footer)}
+      data-testid="marketing-footer"
+      {...props}
+    >
+      <Container marginBottom={marginBottom} className={styles.container}>
         <span className={styles.copyright}>© {year} Liveblocks Inc.</span>
         <LinkButton
           href="https://github.com/liveblocks/liveblocks/tree/main/starter-kits/nextjs-starter-kit"
-          icon={<GitHubIcon />}
+          icon={<GitHubIcon aria-label="GitHub" />}
           target="_blank"
+          rel="noopener noreferrer"
           variant="secondary"
         >
           View on GitHub
@@ -26,4 +32,11 @@ export function MarketingFooter({
       </Container>
     </footer>
   );
+}
+
+
+import { ComponentProps } from "react";
+
+export interface MarketingFooterProps extends ComponentProps<"footer"> {
+  marginBottom?: string;
 }
