@@ -1,20 +1,29 @@
-import { Group } from "@/types";
+// types.ts
 
-/**
- * This array simulates a database consisting of a list of groups.
- * Assign users to groups in /data/users.ts
- */
-export const groups: Group[] = [
+export type GroupId = "product" | "engineering" | "design";
+
+export interface Group {
+  id: GroupId;
+  name: string;
+}
+
+// data.ts
+
+import { Group, GroupId } from "./types";
+
+const groups: Group[] = [
   {
-    id: "product",
+    id: "product" as GroupId,
     name: "Product",
   },
   {
-    id: "engineering",
+    id: "engineering" as GroupId,
     name: "Engineering",
   },
   {
-    id: "design",
+    id: "design" as GroupId,
     name: "Design",
   },
 ];
+
+export default groups;
