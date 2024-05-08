@@ -17,14 +17,12 @@ type Props = {
  *
  * @param documentId - The document id
  */
-export async function getDocumentUsers({ documentId }: Props) {
+export async function getDocumentUsers({ documentId }: Props): Promise<{ data: DocumentUser[] } | { error: { code: number, message: string, suggestion: string } }> {
   let session;
   let room;
   try {
     // Get session and room
-    const result = await Promise.all([auth(), liveblocks.getRoom(documentId)]);
-    session = result[0];
-    room = result[1];
+    [session, room] = await Promise.all([auth(), liveblocks.getRoom(documentId)]);
   } catch (err) {
     console.error(err);
     return {
@@ -36,7 +34,7 @@ export async function getDocumentUsers({ documentId }: Props) {
     };
   }
 
-  if (!room) {
+  if (!session || !room) {
     return {
       error: {
         code: 404,
@@ -47,9 +45,7 @@ export async function getDocumentUsers({ documentId }: Props) {
   }
 
   // If successful, convert room to a list of groups and send
-  const result: DocumentUser[] = await buildDocumentUsers(
-    room,
-    session?.user.info.id ?? ""
-  );
+  const result: DocumentUser[] = await buildDocumentUsers(room, session.user.info.id);
   return { data: result };
 }
+
