@@ -2,8 +2,7 @@ import clsx from "clsx";
 import { ComponentProps, FormEvent, useState } from "react";
 import { PlusIcon } from "@/icons";
 import { updateUserAccess } from "@/lib/actions";
-import { Button } from "@/primitives/Button";
-import { Input } from "@/primitives/Input";
+import { Button, Input } from "@/primitives";
 import { Spinner } from "@/primitives/Spinner";
 import { Document, DocumentAccess, DocumentUser } from "@/types";
 import styles from "./ShareDialogInvite.module.css";
@@ -29,10 +28,16 @@ export function ShareDialogInviteUser({
     setErrorMessage(undefined);
     setInviteLoading(true);
 
+    if (!documentId || !onSetUsers) {
+      setErrorMessage("Document ID or onSetUsers function not provided.");
+      setInviteLoading(false);
+      return;
+    }
+
     const { error } = await updateUserAccess({
       userId: id,
       documentId: documentId,
-      access: DocumentAccess.READONLY,
+      access: DocumentAccess.READONLY as DocumentAccess,
     });
 
     setInviteLoading(false);
@@ -53,13 +58,14 @@ export function ShareDialogInviteUser({
             className={styles.inviteForm}
             onSubmit={(e: FormEvent<HTMLFormElement>) => {
               e.preventDefault();
-              const id = new FormData(e.currentTarget).get("userId") as string;
+              const id = (e.currentTarget as any).userId.value as string;
               handleAddDocumentUser(id);
             }}
           >
             <Input
               className={styles.inviteInput}
               disabled={isInviteLoading}
+              aria-label="Email address"
               name="userId"
               placeholder="Email address"
               required
@@ -68,8 +74,9 @@ export function ShareDialogInviteUser({
             <Button
               className={styles.inviteButton}
               disabled={isInviteLoading}
-              icon={isInviteLoading ? <Spinner /> : <PlusIcon />}
+              aria-label="Invite user"
             >
+              {isInviteLoading ? <Spinner /> : <PlusIcon />}
               Invite
             </Button>
           </form>
