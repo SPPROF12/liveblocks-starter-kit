@@ -3,17 +3,20 @@ import { useSession } from "next-auth/react";
 import { ComponentProps, FormEvent, useState } from "react";
 import { PlusIcon } from "@/icons";
 import { updateGroupAccess } from "@/lib/actions";
-import { Button } from "@/primitives/Button";
-import { Select } from "@/primitives/Select";
-import { Spinner } from "@/primitives/Spinner";
-import { Document, DocumentAccess, DocumentGroup, Group } from "@/types";
+import { Button, Select, Spinner } from "@/primitives";
 import { capitalize } from "@/utils";
 import styles from "./ShareDialogInvite.module.css";
 
+type DocumentAccess = "READONLY" | "READWRITE";
+type DocumentGroup = {
+  id: string;
+  title: string;
+};
+
 interface Props extends ComponentProps<"div"> {
-  documentId: Document["id"];
+  documentId: string;
   fullAccess: boolean;
-  currentGroups: Group[];
+  currentGroups: DocumentGroup[];
   onSetGroups: () => void;
 }
 
@@ -30,8 +33,11 @@ export function ShareDialogInviteGroup({
   const [isInviteLoading, setInviteLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
 
-  // Add a group to the room
-  async function handleAddDocumentGroup(id: DocumentGroup["id"]) {
+  const invitableGroupIds = (session?.user.info.groupIds ?? []).filter(
+    (groupId) => currentGroups.every((group) => group.id !== groupId)
+  );
+
+  const handleAddDocumentGroup = async (id: string) => {
     setErrorMessage(undefined);
     setInviteLoading(true);
 
@@ -49,17 +55,13 @@ export function ShareDialogInviteGroup({
     }
 
     onSetGroups();
-  }
-
-  const invitableGroupIds = (session?.user.info.groupIds ?? []).filter(
-    (groupId) => currentGroups.every((group) => group.id !== groupId)
-  );
+  };
 
   return (
     <div className={clsx(className, styles.section)} {...props}>
       {fullAccess ? (
         <>
-          {!session || invitableGroupIds.length ? (
+          {session && invitableGroupIds.length ? (
             <form
               className={styles.inviteForm}
               onSubmit={(e: FormEvent<HTMLFormElement>) => {
@@ -91,11 +93,11 @@ export function ShareDialogInviteGroup({
                 Invite
               </Button>
             </form>
-          ) : (
+          ) : currentGroups.length > 0 ? (
             <div className={clsx(styles.error, styles.inviteFormMessage)}>
               All of your groups have already been added.
             </div>
-          )}
+          ) : null}
           {errorMessage && (
             <div className={clsx(styles.error, styles.inviteFormMessage)}>
               {errorMessage}
