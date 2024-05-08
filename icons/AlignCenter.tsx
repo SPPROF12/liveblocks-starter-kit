@@ -1,6 +1,6 @@
-import { ComponentProps } from "react";
+import { SVGProps } from 'react';
 
-export function AlignCenterIcon(props: ComponentProps<"svg">) {
+export function AlignCenterIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       width="20"
