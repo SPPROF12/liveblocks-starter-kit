@@ -2,8 +2,8 @@
 
 import { auth } from "@/auth";
 import { userAllowedInRoom } from "@/lib/utils";
-import { liveblocks } from "@/liveblocks.server.config";
 import { Document } from "@/types";
+import { liveblocks } from "@/liveblocks.server.config";
 
 type Props = {
   documentId: Document["id"];
@@ -16,15 +16,16 @@ type Props = {
  * Uses custom API endpoint
  *
  * @param documentId - The document's id
+ * @returns {Promise<{data: string} | {error: {code: number, message: string, suggestion: string}}>}
  */
-export async function deleteDocument({ documentId }: Props) {
+export async function deleteDocument({ documentId }: Props): Promise<{ data: string } | { error: { code: number, message: string, suggestion: string } }> {
   let session;
   let room;
   try {
     // Get session and room
-    const result = await Promise.all([auth(), liveblocks.getRoom(documentId)]);
-    session = result[0];
-    room = result[1];
+    const [sessionResult, roomResult] = await Promise.all([auth(), liveblocks.getRoom(documentId)]);
+    session = sessionResult;
+    room = roomResult;
   } catch (err) {
     console.error(err);
     return {
@@ -46,12 +47,14 @@ export async function deleteDocument({ documentId }: Props) {
     };
   }
 
+  const { user, groupIds } = session?.user.info || {};
+
   // Check current user has write access on the room (if not logged in, use empty values)
   if (
     !userAllowedInRoom({
       accessAllowed: "write",
-      userId: session?.user.info.id ?? "",
-      groupIds: session?.user.info.groupIds ?? [],
+      userId: user?.id ?? "",
+      groupIds,
       room,
     })
   ) {
@@ -79,3 +82,4 @@ export async function deleteDocument({ documentId }: Props) {
 
   return { data: documentId };
 }
+
