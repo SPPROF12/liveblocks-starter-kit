@@ -14,15 +14,15 @@ type Props = {
  * Only allow if user has access to room (including logged-out users and public rooms).
  *
  * @param documentId - The document id
+ * @returns {Promise<{data: Document} | {error: {code: number, message: string, suggestion: string}}>}
  */
-export async function getDocument({ documentId }: Props) {
-  let session;
-  let room;
+export async function getDocument({ documentId }: Props): Promise<{ data: Document } | { error: { code: number, message: string, suggestion: string } }> {
+  let session, room;
   try {
     // Get session and room
-    const result = await Promise.all([auth(), liveblocks.getRoom(documentId)]);
-    session = result[0];
-    room = result[1];
+    const [sessionResult, roomResult] = await Promise.all([auth(), liveblocks.getRoom(documentId)]);
+    session = sessionResult;
+    room = roomResult;
   } catch (err) {
     console.error(err);
     return {
@@ -45,14 +45,21 @@ export async function getDocument({ documentId }: Props) {
   }
 
   // Check current user has access to the room (if not logged in, use empty values)
-  if (
-    !userAllowedInRoom({
-      accessAllowed: "read",
-      userId: session?.user.info.id ?? "",
-      groupIds: session?.user.info.groupIds ?? [],
-      room,
-    })
-  ) {
+  if (!userAllowedInRoom({
+    accessAllowed: "read",
+    userId: session?.user.info.id,
+    groupIds: session?.user.info.groupIds,
+    room,
+  })) {
+    if (!session) {
+      return {
+        error: {
+          code: 401,
+          message: "Unauthorized",
+          suggestion: "Please log in to access the document",
+        },
+      };
+    }
     return {
       error: {
         code: 403,
@@ -66,3 +73,4 @@ export async function getDocument({ documentId }: Props) {
   const document: Document = buildDocument(room);
   return { data: document };
 }
+
