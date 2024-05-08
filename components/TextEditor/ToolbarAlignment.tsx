@@ -5,65 +5,46 @@ import {
   AlignLeftIcon,
   AlignRightIcon,
 } from "@/icons";
-import { Button } from "@/primitives/Button";
+import { Button, ButtonProps } from "@/primitives/Button";
 import styles from "./Toolbar.module.css";
+
+type TextAlign = "left" | "center" | "right" | "justify";
 
 type Props = {
   editor: Editor;
 };
 
+const alignButtonProps = (
+  editor: Editor,
+  tooltip: string,
+  align: TextAlign
+): ButtonProps => ({
+  variant: "subtle",
+  className: styles.toolbarButton,
+  onClick: () => editor.chain().focus().setTextAlign(align).run(),
+  disabled: !editor.can().chain().focus().setTextAlign(align).run(),
+  "data-active": editor.isActive({ textAlign: align }) ? "is-active" : undefined,
+  key: align,
+  ref: editor.view.dom.createElement("button"),
+  aria-label: tooltip,
+});
+
 export function ToolbarAlignment({ editor }: Props) {
   return (
     <>
-      <Button
-        variant="subtle"
-        className={styles.toolbarButton}
-        onClick={() => editor.chain().focus().setTextAlign("left").run()}
-        disabled={!editor.can().chain().focus().setTextAlign("left").run()}
-        data-active={
-          editor.isActive({ textAlign: "left" }) ? "is-active" : undefined
-        }
-        aria-label="Align left"
-      >
+      <Button {...alignButtonProps(editor, "Align left", "left")}>
         <AlignLeftIcon />
       </Button>
 
-      <Button
-        variant="subtle"
-        className={styles.toolbarButton}
-        onClick={() => editor.chain().focus().setTextAlign("center").run()}
-        disabled={!editor.can().chain().focus().setTextAlign("center").run()}
-        data-active={
-          editor.isActive({ textAlign: "center" }) ? "is-active" : undefined
-        }
-        aria-label="Align center"
-      >
+      <Button {...alignButtonProps(editor, "Align center", "center")}>
         <AlignCenterIcon />
       </Button>
 
-      <Button
-        variant="subtle"
-        className={styles.toolbarButton}
-        onClick={() => editor.chain().focus().setTextAlign("right").run()}
-        disabled={!editor.can().chain().focus().setTextAlign("right").run()}
-        data-active={
-          editor.isActive({ textAlign: "right" }) ? "is-active" : undefined
-        }
-        aria-label="Align right"
-      >
+      <Button {...alignButtonProps(editor, "Align right", "right")}>
         <AlignRightIcon />
       </Button>
 
-      <Button
-        variant="subtle"
-        className={styles.toolbarButton}
-        onClick={() => editor.chain().focus().setTextAlign("justify").run()}
-        disabled={!editor.can().chain().focus().setTextAlign("justify").run()}
-        data-active={
-          editor.isActive({ textAlign: "justify" }) ? "is-active" : undefined
-        }
-        aria-label="Justify"
-      >
+      <Button {...alignButtonProps(editor, "Justify", "justify")}>
         <AlignJustifyIcon />
       </Button>
     </>
