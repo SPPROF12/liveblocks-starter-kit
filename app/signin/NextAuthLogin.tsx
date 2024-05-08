@@ -1,7 +1,7 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { ComponentProps } from "react";
+import { ComponentProps, Key } from "react";
 import { Button } from "@/primitives/Button";
 import styles from "./signin.module.css";
 
@@ -16,11 +16,17 @@ export function NextAuthLogin({ providers }: Props) {
 
   return (
     <div className={styles.actions}>
-      {Object.entries(providers).map(([id, name]) => (
-        <Button key={name} onClick={() => signIn(id)}>
-          Sign in with {name}
-        </Button>
-      ))}
+      {Object.entries(providers).map(([id, name]): [Key, any] => {
+        if (!id || !name) {
+          return [null, null];
+        }
+
+        return [id, (
+          <Button key={name} className={styles.button} onClick={() => signIn(id)}>
+            Sign in with {name}
+          </Button>
+        )];
+      })}
     </div>
   );
 }
