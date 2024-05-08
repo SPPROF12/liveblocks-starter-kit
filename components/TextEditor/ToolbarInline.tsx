@@ -3,6 +3,36 @@ import { BoldIcon, ItalicIcon, StrikethroughIcon } from "@/icons";
 import { Button } from "@/primitives/Button";
 import styles from "./Toolbar.module.css";
 
+type ToolbarButtonProps = {
+  editor: Editor;
+  icon: JSX.Element;
+  toggleMethod: () => void;
+  isActiveMethod: () => boolean;
+  ariaLabel: string;
+};
+
+function ToolbarButton({
+  editor,
+  icon,
+  toggleMethod,
+  isActiveMethod,
+  ariaLabel,
+}: ToolbarButtonProps) {
+  return (
+    <Button
+      variant="subtle"
+      className={styles.toolbarButton}
+      onClick={toggleMethod}
+      disabled={!editor.can(toggleMethod)}
+      data-active={isActiveMethod() ? "is-active" : undefined}
+      title={ariaLabel}
+      aria-label={ariaLabel}
+    >
+      {icon}
+    </Button>
+  );
+}
+
 type Props = {
   editor: Editor;
 };
@@ -10,38 +40,29 @@ type Props = {
 export function ToolbarInline({ editor }: Props) {
   return (
     <>
-      <Button
-        variant="subtle"
-        className={styles.toolbarButton}
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        disabled={!editor.can().chain().focus().toggleBold().run()}
-        data-active={editor.isActive("bold") ? "is-active" : undefined}
-        aria-label="Bold"
-      >
-        <BoldIcon />
-      </Button>
+      <ToolbarButton
+        editor={editor}
+        icon={<BoldIcon />}
+        toggleMethod={() => editor.chain().focus().toggleBold().run()}
+        isActiveMethod={() => editor.isActive("bold")}
+        ariaLabel="Bold"
+      />
 
-      <Button
-        variant="subtle"
-        className={styles.toolbarButton}
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        disabled={!editor.can().chain().focus().toggleItalic().run()}
-        data-active={editor.isActive("italic") ? "is-active" : undefined}
-        aria-label="Italic"
-      >
-        <ItalicIcon />
-      </Button>
+      <ToolbarButton
+        editor={editor}
+        icon={<ItalicIcon />}
+        toggleMethod={() => editor.chain().focus().toggleItalic().run()}
+        isActiveMethod={() => editor.isActive("italic")}
+        ariaLabel="Italic"
+      />
 
-      <Button
-        variant="subtle"
-        className={styles.toolbarButton}
-        onClick={() => editor.chain().focus().toggleStrike().run()}
-        disabled={!editor.can().chain().focus().toggleStrike().run()}
-        data-active={editor.isActive("strike") ? "is-active" : undefined}
-        aria-label="Strikethrough"
-      >
-        <StrikethroughIcon />
-      </Button>
+      <ToolbarButton
+        editor={editor}
+        icon={<StrikethroughIcon />}
+        toggleMethod={() => editor.chain().focus().toggleStrike().run()}
+        isActiveMethod={() => editor.isActive("strike")}
+        ariaLabel="Strikethrough"
+      />
     </>
   );
 }
