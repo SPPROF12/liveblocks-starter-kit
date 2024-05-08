@@ -1,3 +1,7 @@
+:root {
+  --animation-duration: 0.15s;
+}
+
 @keyframes up {
   0% {
     opacity: 0;
@@ -28,13 +32,15 @@
   background: var(--color-surface-elevated);
   border-radius: var(--radius);
   box-shadow: var(--shadow-xl);
-  animation: 0.15s ease-in-out;
+  animation-duration: var(--animation-duration);
+  animation-fill-mode: forwards;
   overflow: hidden;
 }
 
 .popover[data-side="top"] {
   animation-name: up;
 }
+
 .popover[data-side="bottom"] {
   animation-name: down;
 }
