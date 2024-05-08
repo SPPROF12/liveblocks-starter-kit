@@ -8,19 +8,24 @@ import { roomAccessesToDocumentAccess } from "./convertAccessType";
  *
  * @param result - Liveblocks getRoomById() result
  */
-export async function buildDocumentGroups(result: RoomInfo) {
+export async function buildDocumentGroups(result: RoomInfo): Promise<DocumentGroup[]> {
   const groups: DocumentGroup[] = [];
 
   for (const [id, accessValue] of Object.entries(result.groupsAccesses)) {
-    const group = await getGroup(id);
+    try {
+      const group = await getGroup(id);
 
-    if (group) {
-      groups.push({
-        ...group,
-        access: roomAccessesToDocumentAccess(accessValue, false),
-      });
+      if (group) {
+        groups.push({
+          ...group,
+          access: roomAccessesToDocumentAccess(accessValue, false),
+        });
+      }
+    } catch (error) {
+      console.error(`Error fetching group ${id}:`, error);
     }
   }
 
   return groups;
 }
+
