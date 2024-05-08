@@ -1,11 +1,17 @@
 import clsx from "clsx";
-import { ComponentProps, forwardRef } from "react";
-import styles from "./Input.module.css";
+import { ForwardedRef, forwardRef, InputHTMLAttributes } from "react";
+import { twMerge } from "tailwind-merge";
 
-export const Input = forwardRef<HTMLInputElement, ComponentProps<"input">>(
-  ({ className, ...props }, ref) => {
+export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
+  (props, ref) => {
+    const { className, ...inputProps } = props;
+
     return (
-      <input ref={ref} className={clsx(className, styles.input)} {...props} />
+      <input
+        ref={ref}
+        className={twMerge(className, "py-2 px-4 rounded-md border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent")}
+        {...inputProps}
+      />
     );
   }
 );
