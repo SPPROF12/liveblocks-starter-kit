@@ -1,23 +1,31 @@
+import React, { useEffect, useState, type ComponentProps, type ReactNode } from "react";
 import { ClientSideSuspense } from "@liveblocks/react";
 import { usePathname } from "next/navigation";
-import { ComponentProps, useEffect, useState } from "react";
 import { InboxIcon } from "@/icons";
 import { useUnreadInboxNotificationsCount } from "@/liveblocks.config";
-import { Button } from "@/primitives/Button";
-import { Popover } from "@/primitives/Popover";
+import { Button, type ButtonProps } from "@/primitives/Button";
+import { Popover, type PopoverProps } from "@/primitives/Popover";
 import { Inbox } from "./Inbox";
 import styles from "./InboxPopover.module.css";
 
 function InboxPopoverUnreadCount() {
   const { count } = useUnreadInboxNotificationsCount();
 
-  return count ? (
-    <div className={styles.inboxPopoverUnreadCount}>{count}</div>
+  const countMemo = useMemo(() => {
+    if (count === undefined || count === null) return null;
+    if (typeof count !== "number") throw new Error("count must be a number");
+    return count;
+  }, [count]);
+
+  return countMemo ? (
+    <div className={styles.inboxPopoverUnreadCount}>{countMemo}</div>
   ) : null;
 }
 
 export function InboxPopover(
-  props: Omit<ComponentProps<typeof Popover>, "content">
+  props: Omit<ComponentProps<typeof Popover>, "content"> & {
+    content: ReactNode;
+  }
 ) {
   const pathname = usePathname();
   const [isOpen, setOpen] = useState(false);
@@ -26,18 +34,26 @@ export function InboxPopover(
     setOpen(false);
   }, [pathname]);
 
+  const buttonProps: ButtonProps = {
+    variant: "secondary",
+    icon: <InboxIcon />,
+    iconButton: true,
+    tabIndex: 0,
+  };
+
+  const popoverProps: PopoverProps = {
+    open: isOpen,
+    onOpenChange: setOpen,
+    content: <Inbox className={styles.inboxPopover} />,
+    ref: props.ref,
+  };
+
   return (
-    <Popover
-      open={isOpen}
-      onOpenChange={setOpen}
-      content={<Inbox className={styles.inboxPopover} />}
-      {...props}
-    >
-      <Button variant="secondary" icon={<InboxIcon />} iconButton>
-        <ClientSideSuspense fallback={null}>
-          {() => <InboxPopoverUnreadCount />}
-        </ClientSideSuspense>
-      </Button>
+    <Popover {...popoverProps}>
+      <ClientSideSuspense fallback={null}>
+        {() => <InboxPopoverUnreadCount />}
+      </ClientSideSuspense>
+      <Button {...buttonProps} />
     </Popover>
   );
 }
