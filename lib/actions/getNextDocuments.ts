@@ -9,6 +9,18 @@ type Props = {
   nextCursor: string;
 };
 
+type Room = {
+  id: string;
+  metadata: {
+    title: string;
+  };
+};
+
+type GetRoomsResponse = {
+  data: Room[];
+  nextCursor: string | null;
+};
+
 /**
  * Get Next Documents
  *
@@ -18,17 +30,13 @@ type Props = {
  *
  * @param nextPage - nextPage, retrieved from getDocumentByGroup
  */
-export async function getNextDocuments({ nextCursor }: Props) {
-  let session;
-  let getRoomsResponse;
+export async function getNextDocuments({ nextCursor }: Props): Promise<{ data: GetDocumentsResponse | null }> {
+  let session: Awaited<ReturnType<typeof auth>> | null = null;
+  let getRoomsResponse: Awaited<ReturnType<typeof liveblocks.getRooms>>;
   try {
     // Get session and rooms
-    const result = await Promise.all([
-      auth(),
-      liveblocks.getRooms({ startingAfter: nextCursor }),
-    ]);
-    session = result[0];
-    getRoomsResponse = result[1];
+    const result = await Promise.all([auth(), liveblocks.getRooms({ startingAfter: nextCursor })]);
+    [session, getRoomsResponse] = result;
   } catch (err) {
     console.log(err);
     return {
@@ -51,9 +59,9 @@ export async function getNextDocuments({ nextCursor }: Props) {
     };
   }
 
-  const { data: rooms, nextCursor: newNextCursor } = getRoomsResponse;
+  const { data: rooms, nextCursor: newNextCursor } = getRoomsResponse as GetRoomsResponse;
 
-  if (!rooms) {
+  if (!Array.isArray(rooms) || !rooms.length) {
     return {
       error: {
         code: 404,
@@ -64,19 +72,14 @@ export async function getNextDocuments({ nextCursor }: Props) {
   }
 
   // In case a room has changed, filter rooms the user no longer has access to
-  const finalRooms = [];
-  for (const room of rooms) {
-    if (
-      userAllowedInRoom({
-        accessAllowed: "read",
-        userId: session.user.info.id,
-        groupIds: session.user.info.groupIds,
-        room: room,
-      })
-    ) {
-      finalRooms.push(room);
-    }
-  }
+  const finalRooms = rooms.filter((room) =>
+    userAllowedInRoom({
+      accessAllowed: "read",
+      userId: session.user.info.id,
+      groupIds: session.user.info.groupIds,
+      room,
+    })
+  );
 
   // Convert to our document format and return
   const documents = buildDocuments(finalRooms);
@@ -87,3 +90,4 @@ export async function getNextDocuments({ nextCursor }: Props) {
 
   return { data: result };
 }
+
