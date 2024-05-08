@@ -1,6 +1,7 @@
-import { ComponentProps } from "react";
+import React from "react";
+import { ComponentProps, SVGProps } from "react";
 
-export function ShareIcon(props: ComponentProps<"svg">) {
+export function ShareIcon(props: ComponentProps<"svg"> & SVGProps<SVGSVGElement>) {
   return (
     <svg
       width="16"
