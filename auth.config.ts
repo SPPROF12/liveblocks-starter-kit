@@ -1,23 +1,21 @@
 import type { NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { getUser } from "@/lib/database";
+import GithubProvider from "next-auth/providers/github";
+import Auth0Provider from "next-auth/providers/auth0";
 
-export const authConfig: NextAuthConfig = {
-  // Configure one or more authentication providers
-  // More info: https://next-auth.js.org/providers/
+const authConfig: NextAuthConfig = {
   providers: [
-    // CredentialsProvider is used for the demo auth system
-    // Replace this with a real provider, e.g. GitHub, Auth0
     CredentialsProvider({
       name: "Credentials",
       credentials: {
         email: {
-          label: "email",
-          type: "text",
+          label: "Email",
+          type: "email",
         },
       },
       async authorize(credentials) {
-        if (!credentials || typeof credentials.email !== "string") {
+        if (!credentials || !credentials.email) {
           throw new Error("No credentials or email");
         }
 
@@ -30,31 +28,23 @@ export const authConfig: NextAuthConfig = {
         return {
           id: user.id,
           name: user.name,
-          email: user.id,
+          email: user.email,
           image: user.avatar,
         };
       },
     }),
 
-    /*
-    // Use GitHub authentication
-    // import GithubProvider from "next-auth/providers/github";
     GithubProvider({
       clientId: process.env.GITHUB_CLIENT_ID as string,
       clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
     }),
-    */
 
-    /*
-    // Use Auth0 authentication
-    // import Auth0Provider from "next-auth/providers/auth0";
     Auth0Provider({
       clientId: process.env.AUTH0_CLIENT_ID as string,
       clientSecret: process.env.AUTH0_CLIENT_SECRET as string,
       issuer: process.env.AUTH0_ISSUER_BASE_URL,
     }),
-    */
-
-    // ...add more providers here
   ],
 };
+
+export default authConfig;
