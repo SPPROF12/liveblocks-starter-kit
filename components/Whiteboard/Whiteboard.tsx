@@ -29,9 +29,9 @@ import { Cursors } from "../Cursors";
 import { WhiteboardNote } from "./WhiteboardNote";
 import styles from "./Whiteboard.module.css";
 
-interface Props extends ComponentProps<"div"> {
+type Props = ComponentProps<"div"> & {
   currentUser: UserMeta["info"] | null;
-}
+};
 
 /**
  * This file shows how to create a multiplayer canvas with draggable notes.
@@ -52,16 +52,13 @@ export function Whiteboard() {
 // The main Liveblocks code, handling all events and note modifications
 function Canvas({ currentUser, className, style, ...props }: Props) {
   // An array of every note id
-  const noteIds: string[] = useStorage(
-    (root) => Array.from(root.notes.keys()),
-    shallow
-  );
+  const noteIds = useStorage((root) => Array.from(root.notes.keys()), shallow);
 
   const history = useHistory();
   const canUndo = useCanUndo();
   const canRedo = useCanRedo();
 
-  const canvasRef = useRef(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
   const rectRef = useBoundingClientRectRef(canvasRef);
 
   const isReadOnly = useSelf((me) => me.isReadOnly);
@@ -72,45 +69,66 @@ function Canvas({ currentUser, className, style, ...props }: Props) {
     element: Element;
     noteId: string;
     offset: { x: number; y: number };
-  } | null>();
+  } | null>(null);
 
   // Insert a new note onto the canvas
-  const insertNote = useMutation(({ storage, self }) => {
-    if (self.isReadOnly) {
-      return;
-    }
+  const insertNote = useMutation(
+    (args) => {
+      if (args.self.isReadOnly) {
+        return;
+      }
 
-    const noteId = nanoid();
-    const note = new LiveObject({
-      x: getRandomInt(300),
-      y: getRandomInt(300),
-      text: "",
-      selectedBy: null,
-      id: noteId,
-    });
-    storage.get("notes").set(noteId, note);
-  }, []);
+      const noteId = nanoid();
+      const note = new LiveObject({
+        x: getRandomInt(300),
+        y: getRandomInt(300),
+        text: "",
+        selectedBy: null,
+        id: noteId,
+      });
+      args.storage.get("notes").set(noteId, note);
+    },
+    {
+      storage: true,
+      self: true,
+    }
+  );
 
   // Delete a note
-  const handleNoteDelete = useMutation(({ storage, self }, noteId) => {
-    if (self.isReadOnly) {
-      return;
-    }
+  const handleNoteDelete = useMutation(
+    (args) => {
+      if (args.self.isReadOnly) {
+        return;
+      }
 
-    storage.get("notes").delete(noteId);
-  }, []);
+      args.storage.get("notes").delete(args.noteId);
+    },
+    {
+      storage: true,
+      self: true,
+      noteId: true,
+    }
+  );
 
   // Update a note, if it exists
-  const handleNoteUpdate = useMutation(({ storage, self }, noteId, updates) => {
-    if (self.isReadOnly) {
-      return;
-    }
+  const handleNoteUpdate = useMutation(
+    (args) => {
+      if (args.self.isReadOnly) {
+        return;
+      }
 
-    const note = storage.get("notes").get(noteId);
-    if (note) {
-      note.update(updates);
+      const note = args.storage.get("notes").get(args.noteId);
+      if (note) {
+        note.update(args.updates);
+      }
+    },
+    {
+      storage: true,
+      self: true,
+      noteId: true,
+      updates: true,
     }
-  }, []);
+  );
 
   // On note pointer down, pause history, set dragged note
   function handleNotePointerDown(
@@ -166,7 +184,7 @@ function Canvas({ currentUser, className, style, ...props }: Props) {
     handleNoteUpdate(noteId, { text: e.target.value, selectedBy: currentUser });
   }
 
-  // When note is focused, update the selected user LiveObject
+  // When note is focused, update the selected user on the LiveObject
   function handleNoteFocus(e: FocusEvent<HTMLTextAreaElement>, noteId: string) {
     history.pause();
     handleNoteUpdate(noteId, { selectedBy: currentUser });
@@ -188,23 +206,18 @@ function Canvas({ currentUser, className, style, ...props }: Props) {
       {...props}
     >
       <Cursors element={canvasRef} />
-      {
-        /*
-         * Iterate through each note in the LiveMap and render it as a note
-         */
-        noteIds.map((id) => (
-          <WhiteboardNote
-            dragged={id === dragInfo?.current?.noteId}
-            id={id}
-            key={id}
-            onBlur={(e) => handleNoteBlur(e, id)}
-            onChange={(e) => handleNoteChange(e, id)}
-            onDelete={() => handleNoteDelete(id)}
-            onFocus={(e) => handleNoteFocus(e, id)}
-            onPointerDown={(e) => handleNotePointerDown(e, id)}
-          />
-        ))
-      }
+      {noteIds.map((id) => (
+        <WhiteboardNote
+          dragged={id === dragInfo?.current?.noteId}
+          id={id}
+          key={id}
+          onBlur={(e) => handleNoteBlur(e, id)}
+          onChange={(e) => handleNoteChange(e, id)}
+          onDelete={() => handleNoteDelete(id)}
+          onFocus={(e) => handleNoteFocus(e, id)}
+          onPointerDown={(e) => handleNotePointerDown(e, id)}
+        />
+      ))}
 
       {!isReadOnly && (
         <div className={styles.toolbar}>
