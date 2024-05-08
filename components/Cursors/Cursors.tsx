@@ -4,43 +4,39 @@ import { Cursor } from "./Cursor";
 
 interface Props {
   // The element that's used for pointer events and scroll position
-  element: MutableRefObject<HTMLElement | null>;
+  elementRef: MutableRefObject<HTMLElement | null>;
 }
 
 /**
  * This file shows you how to create a reusable live cursors component for your product.
- * The component takes a reference to another element ref `element` and renders
+ * The component takes a reference to another element ref `elementRef` and renders
  * cursors according to the location and scroll position of this panel.
  */
-export function Cursors({ element }: Props) {
-  /**
-   * useMyPresence returns a function to update  the current user's presence.
-   * updateMyPresence is different to the setState function returned by the useState hook from React.
-   * You don't need to pass the full presence object to update it.
-   * See https://liveblocks.io/docs/api-reference/liveblocks-react#useUpdateMyPresence for more information
-   */
+export function LiveCursors({ elementRef }: Props) {
+  // UseUpdateMyPresence returns a function to update the current user's presence.
+  // updateMyPresence is different to the setState function returned by the useState hook from React.
+  // You don't need to pass the full presence object to update it.
+  // See https://liveblocks.io/docs/api-reference/liveblocks-react#useUpdateMyPresence for more information
   const updateMyPresence = useUpdateMyPresence();
 
-  /**
-   * Return all the other users in the room and their presence (a cursor position in this case)
-   */
+  // Return all the other users in the room and their presence (a cursor position in this case)
   const others = useOthers();
 
+  // Add event listeners to update the user's presence on pointermove and pointerleave
   useEffect(() => {
-    if (!element.current) {
+    if (!elementRef.current) {
       return;
     }
 
-    // If element, add live cursor listeners
-    const updateCursor = (event: PointerEvent) => {
-      if (!element?.current) {
+    const handlePointerMove = (event: PointerEvent) => {
+      if (!elementRef.current) {
         return;
       }
 
-      const { top, left } = element.current.getBoundingClientRect();
+      const { top, left } = elementRef.current.getBoundingClientRect();
 
-      const x = event.clientX - left + element.current.scrollLeft;
-      const y = event.clientY - top + element.current.scrollTop;
+      const x = event.clientX - left + elementRef.current.scrollLeft;
+      const y = event.clientY - top + elementRef.current.scrollTop;
 
       updateMyPresence({
         cursor: {
@@ -50,32 +46,29 @@ export function Cursors({ element }: Props) {
       });
     };
 
-    const removeCursor = () => {
+    const handlePointerLeave = () => {
       updateMyPresence({
         cursor: null,
       });
     };
 
-    element.current.addEventListener("pointermove", updateCursor);
-    element.current.addEventListener("pointerleave", removeCursor);
+    elementRef.current.addEventListener("pointermove", handlePointerMove);
+    elementRef.current.addEventListener("pointerleave", handlePointerLeave);
 
     // Clean up event listeners
-    const oldRef = element.current;
     return () => {
-      if (!oldRef) {
+      if (!elementRef.current) {
         return;
       }
-      oldRef.removeEventListener("pointermove", updateCursor);
-      oldRef.removeEventListener("pointerleave", removeCursor);
+      elementRef.current.removeEventListener("pointermove", handlePointerMove);
+      elementRef.current.removeEventListener("pointerleave", handlePointerLeave);
     };
-  }, [updateMyPresence, element]);
+  }, [updateMyPresence, elementRef]);
 
+  // Render the cursors for other users based on their presence
   return (
     <>
       {
-        /**
-         * Iterate over other users and display a cursor based on their presence
-         */
         others.map(({ connectionId, presence, info }) => {
           if (presence == null || presence.cursor == null) {
             return null;
