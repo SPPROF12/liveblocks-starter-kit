@@ -25,6 +25,10 @@ export function ShareDialogUsers({
 }: Props) {
   // Remove a collaborator from the room
   async function handleRemoveDocumentUser(id: DocumentUser["id"]) {
+    if (id === documentOwner) {
+      return;
+    }
+
     const { data, error } = await removeUserAccess({
       userId: id,
       documentId: documentId,
@@ -67,28 +71,33 @@ export function ShareDialogUsers({
               name={name}
               size={36}
               src={avatar}
+              marginRight={12}
             />
             <div className={styles.rowInfo}>
               <span className={styles.rowName}>{name}</span>
               {!isCurrentUser && fullAccess ? (
                 <>
                   {id !== documentOwner ? (
-                    <button
-                      className={styles.rowRemoveButton}
-                      onClick={() => handleRemoveDocumentUser(id)}
-                    >
-                      Remove
-                    </button>
+                    <>
+                      <button
+                        className={styles.rowRemoveButton}
+                        onClick={() => handleRemoveDocumentUser(id)}
+                        marginRight={8}
+                        marginLeft={8}
+                      >
+                        Remove
+                      </button>
+                      <span className={styles.rowDescription}>
+                        Owner
+                      </span>
+                    </>
                   ) : (
-                    <span className={styles.rowDescription}>Owner</span>
+                    <span className={styles.rowDescription}>This is you</span>
                   )}
                 </>
               ) : null}
-              {isCurrentUser ? (
-                <span className={styles.rowDescription}>This is you</span>
-              ) : null}
             </div>
-            {!isCurrentUser && id !== documentOwner ? (
+            {!isCurrentUser && id !== documentOwner && fullAccess ? (
               <div className={styles.rowAccessSelect}>
                 <Select
                   aboveOverlay
@@ -111,6 +120,8 @@ export function ShareDialogUsers({
                     handleUpdateDocumentUser(id, value as DocumentAccess);
                   }}
                   value={access}
+                  marginBottom={12}
+                  loading={false}
                 />
               </div>
             ) : null}
