@@ -4,24 +4,24 @@ import { DocumentAccess } from "@/types";
 /**
  * Convert from Liveblocks room accesses to a custom document access format
  * If the user was set on userAccesses, give FULL permissions to edit invited users
- * @param roomAccesses - The room access(es) to check
- * @param setOnUserAccesses - If the user was set with userAccesses or not
+ * @param roomAccess - The room access to check
+ * @param setOnUserAccess - If the user was set with userAccesses or not
  */
-export function roomAccessesToDocumentAccess(
-  roomAccesses: RoomPermission | null,
-  setOnUserAccesses = false
+export function convertRoomAccessToDocumentAccess(
+  roomAccess: RoomPermission | null,
+  setOnUserAccess = false
 ): DocumentAccess {
-  if (!roomAccesses) {
+  if (!roomAccess) {
     return DocumentAccess.NONE;
   }
 
-  if (roomAccesses[0] === "room:write") {
-    return setOnUserAccesses ? DocumentAccess.FULL : DocumentAccess.EDIT;
+  if (roomAccess[0] === "room:write") {
+    return setOnUserAccess ? DocumentAccess.FULL : DocumentAccess.EDIT;
   }
 
   if (
-    roomAccesses[0] === "room:read" &&
-    roomAccesses[1] === "room:presence:write"
+    roomAccess[0] === "room:read" &&
+    roomAccess[1] === "room:presence:write"
   ) {
     return DocumentAccess.READONLY;
   }
@@ -33,19 +33,41 @@ export function roomAccessesToDocumentAccess(
  * Convert from a custom document access format to native Liveblocks room accesses
  * @param documentAccess
  */
-export function documentAccessToRoomAccesses(
+export function convertDocumentAccessToRoomAccesses(
   documentAccess: DocumentAccess
 ): RoomPermission {
-  if (
-    documentAccess === DocumentAccess.FULL ||
-    documentAccess === DocumentAccess.EDIT
-  ) {
-    return ["room:write"];
+  switch (documentAccess) {
+    case DocumentAccess.FULL:
+    case DocumentAccess.EDIT:
+      return ["room:write"];
+    case DocumentAccess.READONLY:
+      return ["room:read", "room:presence:write"];
+    default:
+      throw new Error(`Invalid DocumentAccess value: ${documentAccess}`);
   }
-
-  if (documentAccess === DocumentAccess.READONLY) {
-    return ["room:read", "room:presence:write"];
-  }
-
-  return [];
 }
+
+// Unit tests
+const testCases = [
+  { input: null, expected: DocumentAccess.NONE },
+  { input: ["room:write"], expected: DocumentAccess.EDIT },
+  { input: ["room:write"], setOnUserAccess: true, expected: DocumentAccess.FULL },
+  { input: ["room:read", "room:presence:write"], expected: DocumentAccess.READONLY },
+];
+
+testCases.forEach(({ input, setOnUserAccess, expected }) => {
+  const result = convertRoomAccessToDocumentAccess(input, setOnUserAccess);
+  expect(result).toEqual(expected);
+});
+
+const testCases2 = [
+  { input: DocumentAccess.NONE, expected: [] },
+  { input: DocumentAccess.EDIT, expected: ["room:write"] },
+  { input: DocumentAccess.FULL, expected: ["room:write"] },
+  { input: DocumentAccess.READONLY, expected: ["room:read", "room:presence:write"] },
+];
+
+testCases2.forEach(({ input, expected }) => {
+  const result = convertDocumentAccessToRoomAccesses(input);
+  expect(result).toEqual(expected);
+});
