@@ -9,7 +9,7 @@ import {
   userAllowedInRoom,
 } from "@/lib/utils";
 import { liveblocks } from "@/liveblocks.server.config";
-import { Document, DocumentAccess, DocumentUser } from "@/types";
+import type { Document, DocumentAccess, DocumentUser } from "@/types";
 
 type Props = {
   userId: DocumentUser["id"];
@@ -27,20 +27,21 @@ type Props = {
  * @param documentId - The document id
  * @param access - The access level of the user
  */
-export async function updateUserAccess({ userId, documentId, access }: Props) {
+export const updateUserAccess = async ({
+  userId,
+  documentId,
+  access,
+}: Props): Promise<
+  | { error: { code: number; message: string; suggestion?: string } }
+  | { data: DocumentUser[] }
+> => {
   let session;
   let room;
   let user;
+
   try {
-    // Get session and room
-    const result = await Promise.all([
-      auth(),
-      liveblocks.getRoom(documentId),
-      getUser(userId),
-    ]);
-    session = result[0];
-    room = result[1];
-    user = result[2];
+    // Get session, room and user
+    [session, room, user] = await Promise.all([auth(), liveblocks.getRoom(documentId), getUser(userId)]);
   } catch (err) {
     console.error(err);
     return {
@@ -53,7 +54,7 @@ export async function updateUserAccess({ userId, documentId, access }: Props) {
   }
 
   // Check user is logged in
-  if (!session) {
+  if (!session?.user?.info?.id) {
     return {
       error: {
         code: 401,
@@ -70,7 +71,7 @@ export async function updateUserAccess({ userId, documentId, access }: Props) {
       checkAccessLevel: "user",
       userId: session.user.info.id,
       groupIds: [],
-      room,
+      room: room,
     })
   ) {
     return {
@@ -88,7 +89,6 @@ export async function updateUserAccess({ userId, documentId, access }: Props) {
       error: {
         code: 404,
         message: "Document not found",
-        suggestion: "Check that you're on the correct page",
       },
     };
   }
@@ -150,9 +150,6 @@ export async function updateUserAccess({ userId, documentId, access }: Props) {
     };
   }
 
-  const result: DocumentUser[] = await buildDocumentUsers(
-    updatedRoom,
-    session.user.info.id
-  );
+  const result = await buildDocumentUsers(updatedRoom, session.user.info.id);
   return { data: result };
-}
+};
